@@ -1,50 +1,173 @@
-# Welcome to your Expo app 👋
+# TickTick Todo Clone
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern React Native Todo application inspired by TickTick, built with Expo Router, Zustand, Reanimated, and Shopify Restyle.
 
-## Get started
+The project focuses on scalable architecture, smooth drag-and-drop interactions, and clean separation of concerns.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+# Features
 
-2. Start the app
+* Todo list grouped by categories
+* Drag & drop between categories
+* Create new todo items
+* Responsive layout
+* Smooth animations using Reanimated
+* Lightweight global state management
+* Feature-based scalable architecture
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+# Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Core
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+* React Native
+* Expo
+* Expo Router
 
-## Get a fresh project
+## State Management
 
-When you're ready, run:
+* Zustand
 
-```bash
-npm run reset-project
+## UI / Styling
+
+* Shopify Restyle
+
+## Animations & Gestures
+
+* react-native-reanimated
+* react-native-gesture-handler
+
+## Persistence
+
+* AsyncStorage
+
+---
+
+# Architecture
+
+The project follows a feature-based architecture inspired by modern production-grade React Native applications.
+
+The routing layer is isolated from business logic to ensure scalability and maintainability.
+
+```txt
+src/
+  app/                # Routing layer only
+  features/           # Business features
+  shared/             # Shared UI and utilities
+  entities/           # Domain models
+  store/              # Global state
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Architectural Principles
 
-## Learn more
+* Separation of concerns
+* Reusable UI components
+* Scalable feature modules
+* Isolated business logic
+* Predictable global state
+* Minimal rerenders during drag interactions
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# State Management
 
-## Join the community
+Global application state is managed with Zustand.
 
-Join our community of developers creating universal apps.
+Zustand was selected because it provides:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+* minimal boilerplate
+* excellent performance
+* simple scalable architecture
+* predictable state updates
+
+Local UI state (modals, inputs) is handled with React state when appropriate.
+
+---
+
+# Drag & Drop
+
+Drag and drop interactions are implemented using:
+
+* react-native-gesture-handler
+* react-native-reanimated
+
+Animations are handled on the UI thread to ensure smooth interactions and avoid unnecessary React rerenders.
+
+---
+
+# Folder Structure
+
+```txt
+src/
+  app/
+  entities/
+  features/
+    todos/
+      model/
+      ui/
+      lib/
+  shared/
+    ui/
+    theme/
+    lib/
+  store/
+```
+
+---
+
+# Installation
+
+```bash
+npm install
+```
+
+---
+
+# Run the project
+
+## iOS
+
+```bash
+npm run ios
+```
+
+## Android
+
+```bash
+npm run android
+```
+
+## Web
+
+```bash
+npm run web
+```
+
+---
+
+# Testing
+
+The project includes unit tests for core business logic such as:
+
+* adding todos
+* moving todos between categories
+* grouping todos
+
+---
+
+# Future Improvements
+
+* Backend synchronization
+* Offline-first support
+* Todo editing
+* Swipe actions
+* Advanced filtering
+* Dark mode customization
+
+---
+
+# Notes
+
+The goal of this project was not only to recreate a Todo application, but also to demonstrate production-level React Native architecture and maintainable frontend engineering practices.
