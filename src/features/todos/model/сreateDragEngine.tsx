@@ -1,24 +1,33 @@
+import {useDragStore} from "@/store/drag.store";
+
 export function createDragEngine() {
+
     let startX = 0;
     let startY = 0;
     let dragging = false;
+    let pressed = false;
 
     let activeId: string | null = null;
     let fromCategory: string | null = null;
+
 
     let onGestureStart = () => {};
     let onDragStart = (id: string, categoryId: string) => {};
     let onMove = (x: number, y: number) => {};
     let onEnd = () => {};
 
+
     function start(id, categoryId, e) {
         startX = e.absoluteX;
         startY = e.absoluteY;
 
-        dragging = false;
-
         activeId = id;
         fromCategory = categoryId;
+
+        pressed = true;
+        dragging = false;
+
+        onDragStart(activeId, fromCategory, e);
     }
 
     function move(e) {
@@ -27,8 +36,6 @@ export function createDragEngine() {
 
         if (!dragging && Math.hypot(dx, dy) > 8) {
             dragging = true;
-
-            onDragStart(activeId, fromCategory);
         }
 
         if (!dragging) return;
@@ -37,6 +44,8 @@ export function createDragEngine() {
     }
 
     function end() {
+        if (!pressed) return;
+
         if (!dragging) {
             cancel();
             return;
@@ -50,7 +59,12 @@ export function createDragEngine() {
     }
 
     function cancel() {
+        pressed = false;
         dragging = false;
+
+        activeId = null;
+        fromCategory = null;
+
     }
 
     return {

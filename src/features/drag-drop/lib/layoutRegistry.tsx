@@ -1,3 +1,5 @@
+import {TODO_ITEM_HEIGHT} from "@/features/todos/constants";
+
 class LayoutRegistry {
     zones = new Map();
 
@@ -12,23 +14,38 @@ class LayoutRegistry {
     }
 
     getIndex(zone, y, itemsIds = []) {
-        const ITEM_HEIGHT = 50;
-
         const localY = y - zone.y;
 
-        if (localY <= ITEM_HEIGHT / 2) {
-            return 0;
-        }
-        const index = Math.floor(localY / ITEM_HEIGHT);
+        const clampedY = Math.max(0, localY);
+
+        const index = Math.round(clampedY / TODO_ITEM_HEIGHT);
 
         return Math.max(
             0,
             Math.min(itemsIds.length, index)
         );
     }
+
     clear() {
         this.zones.clear();
     }
 }
 
 export const layoutRegistry = new LayoutRegistry();
+
+
+// getIndex(zone, y, itemsIds = []) {
+//
+//
+//     const localY = y - zone.y;
+//
+//     if (localY <= TODO_ITEM_HEIGHT / 2) {
+//         return 0;
+//     }
+//     const index = Math.floor(localY / TODO_ITEM_HEIGHT);
+//
+//     return Math.max(
+//         0,
+//         Math.min(itemsIds.length, index)
+//     );
+// }

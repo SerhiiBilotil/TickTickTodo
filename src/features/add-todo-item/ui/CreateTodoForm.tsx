@@ -1,75 +1,81 @@
-import React from "react";
+import React, {useEffect} from "react";
+import { Keyboard } from "react-native";
 
 import { Box } from "@/shared/ui/Box";
 import { Input } from "@/shared/ui/Input";
 import { Button } from "@/shared/ui/Button";
 
 import { useCreateTodo } from "../model/useCreateTodo";
-import {CategorySelectModal} from "@/features/add-todo-item/ui/CategorySelectModal";
-import {useUIStore} from "@/store/ui.store";
-import {useTodoStore} from "@/store/todo.store";
+import { useTodoStore } from "@/store/todo.store";
 
 type Props = {
     onClose: () => void;
-    categoryOpen: boolean;
-    onCloseCategory: (open: boolean) => void;
+    title: string;
+    setTitle: (value: string) => void;
+    description: string;
+    setDescription: (value: string) => void;
+    categoryId: string;
+    setCategoryId: (id: string) => void;
+    submit: () => void;
+    onCloseCategory: () => void;
+    inputRef?: any;
 };
 
-export const CreateTodoForm = ({ onClose ,categoryOpen,onCloseCategory }: Props) => {
-    const {
-        title,
-        setTitle,
-        description,
-        setDescription,
-        categoryId,
-        setCategoryId,
-        submit,
-    } = useCreateTodo(onClose);
-
-    const categories = useTodoStore((state) => state.categories);
+export const CreateTodoForm = ({
+                                   title,
+                                   setTitle,
+                                   description,
+                                   setDescription,
+                                   submit,
+                                   inputRef,
+                               }: Props) => {
 
 
 
-    console.log('cat', categories)
+
+    const handleSubmit = () => {
+        if (!title.trim()) return;
+
+        submit();
+        Keyboard.dismiss();
+    };
+
     return (
         <Box
             backgroundColor="card"
             borderRadius="l"
-            padding="l"
             gap="m"
         >
             <Input
+                ref={inputRef}
                 placeholder="Title"
                 value={title}
                 onChangeText={setTitle}
+
+                style={{
+                    width: "100%",
+                    fontSize: 13,
+                    color: "#fff",
+                    paddingVertical: 6,
+                }}
+                returnKeyType="next"
             />
 
             <Input
                 placeholder="Description"
                 value={description}
                 onChangeText={setDescription}
+                style={{
+                    width: "100%",
+                    fontSize: 13,
+                    color: "#fff",
+                    paddingVertical: 6,
+                }}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmit}
             />
 
-
-            <Button
-                title={`Category: ${
-                    categories.find(
-                        (c) => c.id === categoryId
-                    )?.title
-                }`}
-                onPress={onCloseCategory}
-                variant="secondary"
-            />
-
-            <Button title="Create" onPress={submit} />
-
-            <CategorySelectModal
-                open={categoryOpen}
-                onClose={onCloseCategory}
-                value={categoryId}
-                onChange={setCategoryId}
-                categories={categories}
-            />
+            <Button title="Create" onPress={handleSubmit} />
         </Box>
     );
 };

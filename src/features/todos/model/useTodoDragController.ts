@@ -16,14 +16,27 @@ export function useTodoDragController() {
     const reorder = useTodoStore((s) => s.reorderTodos);
     const changeCategory = useTodoStore((s) => s.moveTodoToCategory);
     const resetStore = useDragStore((s) => s.reset);
-
+    const setReordering = useDragStore((s) => s.setReordering);
     const engine = useMemo(() => createDragEngine(), []);
+    const setAnchor = useDragStore((s) => s.setAnchor);
 
     engine.setHandlers({
         onGestureStart: () => {},
 
         onDragStart: (id, categoryId) => {
             startDrag(id, categoryId);
+
+            const todos = useTodoStore.getState().todos;
+
+            const inCategory = todos
+                .filter(t => t.categoryId === categoryId);
+
+            const index = inCategory.findIndex(t => t.id === id);
+
+            setPreview({
+                category: categoryId,
+                index: index === -1 ? 0 : index,
+            });
         },
 
         onMove: (px, py) => {
@@ -62,8 +75,8 @@ export function useTodoDragController() {
         },
 
         onEnd: () => {
+            setReordering(true);
             const { activeId, fromCategory } = useDragStore.getState();
-            // layoutRegistry.clear()
             const targetCategory = overCategory.value;
             const index = overIndex.value;
 
@@ -77,13 +90,14 @@ export function useTodoDragController() {
                 changeCategory(activeId, targetCategory, index);
             }
 
+
             resetStore();
             reset()
 
-            x.value = 0;
-            y.value = 0;
-            overCategory.value = null;
-            overIndex.value = null;
+            requestAnimationFrame(() => {
+                setReordering(false);
+            });
+
 
         },
     });

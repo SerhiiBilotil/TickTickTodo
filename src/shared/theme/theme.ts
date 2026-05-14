@@ -22,7 +22,12 @@ export const theme = createTheme({
         xl: 32,
         xxl: 40,
     },
-
+    borderWidth: {
+        none: 0,
+        thin: 1,
+        medium: 2,
+        thick: 4,
+    },
     borderRadii: {
         s: 8,
         m: 12,

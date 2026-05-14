@@ -15,20 +15,22 @@ import { Text } from "@/shared/ui/Text";
 
 import { useTodoDragController } from "../model/useTodoDragController";
 import {useDragStore} from "@/store/drag.store";
+import {TODO_ITEM_HEIGHT} from "@/features/todos/constants";
 
-const ITEM_HEIGHT = 50;
+
 
 export const TodoItem = ({ todo }) => {
     const { engine } = useTodoDragController();
 
     const activeTodoId = useDragStore((s) => s.activeId);
-
+    const isReordering = useDragStore((s) => s.isReordering);
     const isActive = activeTodoId === todo.id;
 
     const style = useAnimatedStyle(() => ({
         opacity: isActive ? 0 : 1,
-        height: isActive ? 0 : 50,
-        zIndex: isActive ? 999 : 1,
+        height: isActive ? 0 : TODO_ITEM_HEIGHT,
+        zIndex: isActive ? 10 : 1,
+        marginBottom: isActive ? 0 : 8,
     }));
 
     const gesture = useMemo(() =>
@@ -47,14 +49,33 @@ export const TodoItem = ({ todo }) => {
     return (
         <GestureDetector gesture={gesture}>
             <Animated.View
-                layout={LinearTransition}
+                layout={
+                    isReordering
+                        ? undefined
+                        : LinearTransition
+                }
                 collapsable={false}
                 style={style}
             >
-                <Box padding="m" borderRadius="m" backgroundColor="card">
+                <Box paddingHorizontal="m"  borderRadius="m" backgroundColor="card" style={styles.content}>
                     <Text numberOfLines={1} ellipsizeMode="tail">{todo.title}</Text>
                 </Box>
             </Animated.View>
         </GestureDetector>
     );
+};
+
+const styles = {
+    container: {
+        height: TODO_ITEM_HEIGHT,
+        overflow: "hidden",
+    },
+
+    content: {
+        flex: 1,
+        justifyContent: "center",
+        backgroundColor: "card",
+        borderRadius: 12,
+        paddingHorizontal: 12,
+    }
 };

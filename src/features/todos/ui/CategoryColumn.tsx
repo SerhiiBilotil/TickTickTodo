@@ -14,14 +14,13 @@ export const TodoCategoryColumn = ({ category, todos }) => {
     const active = preview.category === category.id;
     const placeholderIndex = active ? preview.index : -1;
 
-    console.log('preview', preview);
     return (
         <Box marginBottom="l">
             <Text variant="categoryTitle" marginBottom="s">
                 {category.title}
             </Text>
 
-            <Box gap="s">
+            <Box >
                 {todos.map((todo, i) => (
                     <React.Fragment key={todo.id}>
                         {active && placeholderIndex === i && (

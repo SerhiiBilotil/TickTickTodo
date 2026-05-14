@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
 import { useUIStore } from "@/store/ui.store";
 
@@ -13,18 +13,36 @@ export default function Dashboard() {
     const [createOpen, setCreateOpen] = useState(false);
     const [categoryOpen, setCategoryOpen] = useState(false);;
 
+    const inputRef = React.useRef<any>(null);
+
+    const openCreateModal = async () => {
+        setCreateOpen(true);
+
+    }
+
+
+    useEffect(() => {
+        if (createOpen) {
+            setTimeout(() => {
+                inputRef.current?.focus?.();
+            }, 300);
+        }
+    }, [createOpen]);
+
+
     return (
         <Screen>
             <TodoBoard />
             <DragOverlay />
 
-            <FloatingButton onPress={() => setCreateOpen(true)} />
+            <FloatingButton onPress={() => openCreateModal(true)} />
 
             <CreateTodoModal
                 visible={createOpen}
-                onClose={setCreateOpen}
+                onClose={() => setCreateOpen(false)}
                 categoryOpen={categoryOpen}
-                onCloseCategory={() => setCategoryOpen(true)}
+                onCloseCategory={() => setCategoryOpen(false)}
+                inputRef={inputRef}
             />
         </Screen>
     );

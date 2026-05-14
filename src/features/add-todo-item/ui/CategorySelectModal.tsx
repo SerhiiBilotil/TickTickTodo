@@ -1,72 +1,67 @@
 import React from "react";
-import { Modal, Pressable } from "react-native";
+import { Pressable } from "react-native";
+
 import { Box } from "@/shared/ui/Box";
-import { Button } from "@/shared/ui/Button";
-import {Category} from "@/entities/todo/model/types";
-
-
+import { Text } from "@/shared/ui/Text";
 
 type Props = {
     open: boolean;
+    anchor: {
+        x: number;
+        y: number;
+    };
+    categories: Array<{
+        id: string;
+        title: string;
+    }>;
+    onSelect: (id: string) => void;
     onClose: () => void;
-    value: string;
-    onChange: (id: string) => void;
-    categories: Category[];
 };
 
 export const CategorySelectModal = ({
                                         open,
-                                        onClose,
-                                        value,
-                                        onChange,
+                                        anchor,
                                         categories,
+                                        onSelect,
+                                        onClose,
                                     }: Props) => {
-    return (
-        <Modal
-            visible={open}
-            transparent
-            animationType="fade"
-            onRequestClose={onClose}
-        >
+    if (!open) return null;
+    console.log('open')
 
-            <Pressable
-                style={{
-                    flex: 1,
-                    backgroundColor: "rgba(0,0,0,0.4)",
-                }}
-                onPress={onClose}
+    return (
+        <Pressable
+            style={{
+                position: "absolute",
+                zIndex: 9999,
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+            }}
+            onPress={onClose}
+        >
+            <Box
+                position="absolute"
+                top={anchor.y}
+                left={anchor.x}
+                width={220}
+                backgroundColor="card"
+                borderRadius="l"
+                padding="m"
+                gap="s"
+                elevation={10}
             >
-                <Box
-                    backgroundColor="card"
-                    padding="m"
-                    borderRadius="l"
-                    style={{
-                        position: "absolute",
-                        top: 120,
-                        left: 20,
-                        right: 20,
-                        elevation: 10,
-                    }}
-                >
-                    <Box gap="s">
-                        {categories.map((cat) => (
-                            <Button
-                                key={cat.id}
-                                title={cat.title}
-                                onPress={() => {
-                                    onChange(cat.id);
-                                    onClose();
-                                }}
-                                variant={
-                                    value === cat.id
-                                        ? "primary"
-                                        : "secondary"
-                                }
-                            />
-                        ))}
-                    </Box>
-                </Box>
-            </Pressable>
-        </Modal>
+                {categories.map((cat) => (
+                    <Pressable
+                        key={cat.id}
+                        onPress={() => onSelect(cat.id)}
+                    >
+                        <Box padding="s" borderRadius="m">
+                            <Text color="white">{cat.title}</Text>
+                        </Box>
+                    </Pressable>
+                ))}
+            </Box>
+        </Pressable>
     );
 };

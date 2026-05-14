@@ -15,6 +15,7 @@ export const DragProvider = ({ children }) => {
     const overIndex = useSharedValue(null);
     const overCategory = useSharedValue(null);
 
+
     const activeId = useSharedValue(null);
 
     const [preview, setPreview] = useState({
