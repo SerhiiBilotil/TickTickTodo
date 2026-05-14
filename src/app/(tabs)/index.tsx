@@ -1,26 +1,31 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
-import { useTodoStore } from "@/store/store";
-import { TodoBoard } from "@/features/todos/ui/TodoBoard";
+import React, {useState} from "react";
+
+import { useUIStore } from "@/store/ui.store";
+
+import { Screen } from "@/shared/ui/Screen";
 import { FloatingButton } from "@/shared/ui/FloatingButton";
-import {DragOverlay} from "@/features/drag-drop/ui/DragOverlay";
 
-export default function HomeScreen() {
-  const todos = useTodoStore((state) => state.todos);
+import { TodoBoard } from "@/features/todos/ui/TodoBoard";
+import { DragOverlay } from "@/features/drag-drop/ui/DragOverlay";
+import { CreateTodoModal } from "@/features/add-todo-item/ui/CreateTodoModal";
 
-  return (
-      <View style={styles.container}>
-        <TodoBoard todos={todos} />
-         <DragOverlay/>
+export default function Dashboard() {
+    const [createOpen, setCreateOpen] = useState(false);
+    const [categoryOpen, setCategoryOpen] = useState(false);;
 
-        <FloatingButton />
-      </View>
-  );
+    return (
+        <Screen>
+            <TodoBoard />
+            <DragOverlay />
+
+            <FloatingButton onPress={() => setCreateOpen(true)} />
+
+            <CreateTodoModal
+                visible={createOpen}
+                onClose={setCreateOpen}
+                categoryOpen={categoryOpen}
+                onCloseCategory={() => setCategoryOpen(true)}
+            />
+        </Screen>
+    );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0f0f12",
-  },
-});

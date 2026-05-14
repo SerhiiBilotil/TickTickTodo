@@ -1,32 +1,20 @@
-import React, {
-    useEffect,
-    useRef,
-} from "react";
-import Animated from "react-native-reanimated";
+import React, { useEffect } from "react";
 import { View } from "react-native";
-import {registerZone} from "@/features/drag-drop/useDropZones";
-import {useAnimatedStyle, withSpring} from "react-native-reanimated";
-import {useDrag} from "@/features/drag-drop/DragProvider";
+import { layoutRegistry } from "@/features/drag-drop/lib/layoutRegistry";
 
+export const DropZone = ({ categoryId, children }) => {
+    const ref = React.useRef(null);
 
-export const DropZone = ({categoryId, children,}) => {
-    const { listOffset} = useDrag();
-    const ref = useRef<View>(null);
-
-    useEffect(() => {
-        requestAnimationFrame(() => {
-            ref.current?.measure((x, y, width, height, pageX, pageY) => {
-                registerZone(categoryId, pageY, height);
-            });
+    const onLayout = (e) => {
+        layoutRegistry.registerZone({
+            id: categoryId,
+            y: e.nativeEvent.layout.y,
+            height: e.nativeEvent.layout.height,
         });
-    }, [categoryId, children]);
-
-    ref.current?.measure((x, y, w, h, px, py) => {
-        listOffset.value = py;
-    });
+    };
 
     return (
-        <View ref={ref}>
+        <View onLayout={onLayout} ref={ref}>
             {children}
         </View>
     );

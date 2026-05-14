@@ -1,99 +1,94 @@
-import { useRef } from "react";
-import { runOnJS, withSpring, useSharedValue } from "react-native-reanimated";
-import { Gesture } from "react-native-gesture-handler";
+import { useMemo } from "react";
 
-import { useTodoDrag } from "../model/useTodoDrag";
-import { useDrag } from "@/features/drag-drop/DragProvider";
-import { getIndexByY, getZoneByY } from "@/features/drag-drop/useDropZones";
+import { layoutRegistry } from "../../drag-drop/lib/layoutRegistry";
+import { useDrag } from "@/features/drag-drop/model/DragProvider";
+import { createDragEngine } from "@/features/todos/model/сreateDragEngine";
+import { useDragStore } from "@/store/drag.store";
+import {useTodoStore} from "@/store/todo.store";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
-const ITEM_HEIGHT = 55;
-const DRAG_THRESHOLD = 8;
+export function useTodoDragController() {
+    const insets = useSafeAreaInsets();
+    const { x, y, overIndex, overCategory,setPreview, scrollYRef , reset} = useDrag();
+    const normalizeY = (y) => y + scrollYRef.current - insets.top;
 
-export const useTodoDragController = ({ todo }) => {
-    const { startDrag, endDrag } = useTodoDrag();
-    const { x, y, resetPointer, overIndex, overCategory } = useDrag();
+    const startDrag = useDragStore((s) => s.startDrag);
+    const reorder = useTodoStore((s) => s.reorderTodos);
+    const changeCategory = useTodoStore((s) => s.moveTodoToCategory);
+    const resetStore = useDragStore((s) => s.reset);
 
-    const scale = useSharedValue(1);
-    const isDraggingLocal = useSharedValue(false);
-    const startY = useSharedValue(0);
-    const startX = useSharedValue(0);
+    const engine = useMemo(() => createDragEngine(), []);
 
-    const currentZone = useSharedValue(null);
-    const currentIndex = useSharedValue(null);
+    engine.setHandlers({
+        onGestureStart: () => {},
 
-    const lastRef = useRef({
-        category: null,
-        index: null,
-    });
+        onDragStart: (id, categoryId) => {
+            startDrag(id, categoryId);
+        },
 
-    const gesture = Gesture.Pan()
-        .onBegin((e) => {
-            startY.value = e.absoluteY;
-            startX.value = e.absoluteX;
-            isDraggingLocal.value = false;
+        onMove: (px, py) => {
+            x.value = px;
+            y.value = py;
 
-            x.value = e.absoluteX;
-            y.value = e.absoluteY;
-        })
+            const normalizedY = normalizeY(py);
+            const zone = layoutRegistry.getZoneByY(normalizedY);
 
-        .onUpdate((e) => {
-            const distance = Math.hypot(e.absoluteX - startX.value, e.absoluteY - startY.value)
-
-            if (!isDraggingLocal.value && distance > DRAG_THRESHOLD) {
-                isDraggingLocal.value = true;
-                runOnJS(startDrag)(todo.id);
-                scale.value = withSpring(1.05);
-            }
-
-            if (!isDraggingLocal.value) return;
-
-            x.value = e.absoluteX;
-            y.value = e.absoluteY;
-
-            const zone = getZoneByY(e.absoluteY);
             if (!zone) return;
 
-            const localY = e.absoluteY - zone.y;
-            const nextIndex = getIndexByY(localY, ITEM_HEIGHT, 3);
+            const todosInZone = useTodoStore
+                .getState()
+                .todos.filter((t) => t.categoryId === zone.id);
 
-            currentZone.value = zone.id;
-            currentIndex.value = nextIndex;
+            const index = layoutRegistry.getIndex(
+                zone,
+                normalizedY,
+                todosInZone.map(t => t.id)
+            );
 
             if (
-                lastRef.current.category === zone.id &&
-                lastRef.current.index === nextIndex
+                overCategory.value === zone.id &&
+                overIndex.value === index
             ) {
                 return;
             }
 
-            lastRef.current = {
-                category: zone.id,
-                index: nextIndex,
-            };
-
             overCategory.value = zone.id;
-            overIndex.value = nextIndex;
-        })
+            overIndex.value = index;
 
-        .onEnd(() => {
-            if (!isDraggingLocal.value) return;
-
-            runOnJS(endDrag)({
-                categoryId: currentZone.value,
-                index: currentIndex.value,
+            setPreview({
+                category: zone.id,
+                index,
             });
+        },
 
-            currentZone.value = null;
-            currentIndex.value = null;
-            isDraggingLocal.value = false;
+        onEnd: () => {
+            const { activeId, fromCategory } = useDragStore.getState();
+            // layoutRegistry.clear()
+            const targetCategory = overCategory.value;
+            const index = overIndex.value;
 
-            runOnJS(resetPointer)();
+            if (!activeId || !targetCategory) return;
 
-            scale.value = withSpring(1);
-        });
+            const isSameCategory = fromCategory === targetCategory;
+
+            if (isSameCategory) {
+                reorder(activeId, index, targetCategory);
+            } else {
+                changeCategory(activeId, targetCategory, index);
+            }
+
+            resetStore();
+            reset()
+
+            x.value = 0;
+            y.value = 0;
+            overCategory.value = null;
+            overIndex.value = null;
+
+        },
+    });
 
     return {
-        gesture,
-        scale,
+        engine,
     };
-};
+}

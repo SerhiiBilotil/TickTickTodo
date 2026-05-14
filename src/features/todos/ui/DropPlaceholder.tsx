@@ -1,30 +1,21 @@
 import React from "react";
-import Animated, { FadeIn, FadeOut, useAnimatedStyle } from "react-native-reanimated";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import { useDrag } from "@/features/drag-drop/model/DragProvider";
 
-const ITEM_HEIGHT = 55;
+const ITEM_HEIGHT = 50;
 
-export const DropPlaceholder = ({
-                                    index,
-                                    categoryId,
-                                    isEnd = false,
-                                    overIndex,
-                                    overCategory,
-                                }) => {
+export const DropPlaceholder = ({ index, categoryId }) => {
+    const { overIndex, overCategory } = useDrag();
+
     const style = useAnimatedStyle(() => {
-        const isActive =
-            overCategory.value === categoryId &&
-            overIndex.value === index;
-
         return {
-            height: ITEM_HEIGHT,
-            opacity: isActive ? 1 : 0,
+            height: 55,
+            overflow: "hidden",
         };
     });
 
     return (
         <Animated.View
-            entering={FadeIn.duration(120)}
-            exiting={FadeOut.duration(120)}
             style={[
                 {
                     borderRadius: 12,

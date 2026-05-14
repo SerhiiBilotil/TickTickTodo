@@ -5,7 +5,7 @@ import { ThemeProvider } from "@shopify/restyle";
 
 import { theme } from "@/shared/theme/theme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import {DragProvider} from "@/features/drag-drop/DragProvider";
+import {DragProvider} from "@/features/drag-drop/model/DragProvider";
 import {StatusBar} from "react-native";
 
 

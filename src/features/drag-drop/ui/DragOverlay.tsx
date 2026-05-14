@@ -1,24 +1,23 @@
-import Animated, {
-    useAnimatedStyle,
-} from "react-native-reanimated";
-
-import { View } from "react-native";
-
-import { useTodoStore } from "@/store/store";
-import { useDrag } from "@/features/drag-drop/DragProvider";
-import {Box} from "@/shared/ui/Box";
-import {Text} from "@/shared/ui/Text";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import React from "react";
+
+import { Box } from "@/shared/ui/Box";
+import { Text } from "@/shared/ui/Text";
+
+import { useDrag } from "@/features/drag-drop/model/DragProvider";
+import { useDragStore } from "@/store/drag.store";
+import { useTodoStore } from "@/store/todo.store";
 
 export const DragOverlay = () => {
     const { x, y } = useDrag();
 
-    const drag = useTodoStore((s) => s.drag);
+    const activeId = useDragStore((s) => s.activeId);
+
     const todos = useTodoStore((s) => s.todos);
 
-    const todo = todos.find(
-        (t) => t.id === drag.activeTodoId
-    );
+    const todo = activeId
+        ? todos.find((t) => t.id === activeId)
+        : null;
 
     const style = useAnimatedStyle(() => {
         const hidden =
@@ -29,27 +28,28 @@ export const DragOverlay = () => {
             position: "absolute",
             zIndex: 999,
             transform: [
-                { translateX: x.value - 20 },
-                { translateY: y.value - 20 },
+                { translateX: x.value - 25 },
+                { translateY: y.value - 25 },
             ],
             opacity:
-                drag.isDragging && !hidden
+                activeId && !hidden
                     ? 1
                     : 0,
         };
     });
 
-    if (!todo || !drag.isDragging) {
+    if (!todo || !activeId) {
         return null;
     }
 
     return (
-
         <Animated.View style={style}>
-            <Box padding="m" borderRadius="m" backgroundColor="card">
-                <Text>
-                    {todo.title}
-                </Text>
+            <Box
+                padding="m"
+                borderRadius="m"
+                backgroundColor="card"
+            >
+                <Text>{todo.title}</Text>
             </Box>
         </Animated.View>
     );

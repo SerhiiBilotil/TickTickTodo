@@ -23,7 +23,7 @@ export default function TabLayout() {
                 options={{
                     title: "Tasks",
                     tabBarIcon: ({ color }) => (
-                        <Text color={color}>●</Text>
+                        <Text style={{color: theme.colors.white}}>●</Text>
                     ),
                 }}
             />
