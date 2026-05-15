@@ -10,13 +10,9 @@ export const DragProvider = ({ children }) => {
     const setScrollY = (y) => {
         scrollYRef.current = y;
     };
-
-
     const overIndex = useSharedValue(null);
     const overCategory = useSharedValue(null);
 
-
-    const activeId = useSharedValue(null);
 
     const [preview, setPreview] = useState({
         category: null,
@@ -28,12 +24,12 @@ export const DragProvider = ({ children }) => {
         y.value = 0;
         overIndex.value = null;
         overCategory.value = null;
-        activeId.value = null;
 
         setPreview({
             category: null,
             index: null,
         });
+
     };
 
     return (

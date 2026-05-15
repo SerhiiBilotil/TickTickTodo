@@ -1,4 +1,4 @@
-import { createDragEngine } from "@/features/todos/model/сreateDragEngine";
+import { createDragEngine } from "@/features/drag-drop/model/сreateDragEngine";
 
 describe("drag engine", () => {
     it("starts dragging after threshold", () => {
@@ -9,12 +9,12 @@ describe("drag engine", () => {
         engine.setHandlers({
             onDragStart,
         });
-
+        jest.useFakeTimers();
         engine.start("1", "today", {
             absoluteX: 0,
             absoluteY: 0,
         });
-
+        jest.advanceTimersByTime(500);
         engine.move({
             absoluteX: 20,
             absoluteY: 20,

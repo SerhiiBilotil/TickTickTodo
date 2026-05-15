@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { ScrollView } from "react-native";
 
 import { Box } from "@/shared/ui/Box";
@@ -19,10 +19,8 @@ export const TodoBoard = () => {
     const { setScrollY, preview } = useDrag();
 
 
-
     return (
         <ScrollView
-
                     contentContainerStyle={{ padding: 16 }}
                     scrollEnabled={true}
                     nestedScrollEnabled={false}

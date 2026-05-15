@@ -1,20 +1,5 @@
 import { create } from "zustand";
-import { Category, Todo } from "@/entities/todo/model/types";
-
-
-type TodoState = {
-    categories: Category[];
-    todos: Todo[];
-    setTodos: (todos: Todo[]) => void;
-    addTodoItem: (todo: Omit<Todo, "id">) => void;
-    setCategories: (categories: Category[]) => void;
-    reorderTodos: (
-        activeId: string,
-        overIndex: number,
-        categoryId: string
-    ) => void;
-    moveTodoToCategory: (todoId: string, categoryId: string, index: boolean) => void;
-};
+import {Category, Todo, TodoState} from "@/entities/todo/model/types";
 
 
 export const useTodoStore = create<TodoState>((set, get) => ({

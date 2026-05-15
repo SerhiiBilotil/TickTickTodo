@@ -24,7 +24,6 @@ export const useCreateTodo = (
             setError("Title is required");
             return;
         }
-        console.log('cat id', categoryId)
         addTodo({
             title,
             description,
@@ -39,9 +38,6 @@ export const useCreateTodo = (
     };
 
 
-    useEffect(() => {
-        console.log('cati', categoryId);
-    },[categoryId]);
 
     return {
         title,

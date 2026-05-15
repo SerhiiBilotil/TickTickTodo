@@ -1,5 +1,6 @@
-import { renderHook, act } from "@testing-library/react-native";
-import { useCreateTodo } from "@/features/add-todo-item/model/useCreateTodo";
+import { renderHook } from "@testing-library/react-native";
+import {act} from "react";
+import {useCreateTodo} from "@/features/add-todo-item/model/useCreateTodo";
 
 describe("useCreateTodo", () => {
     it("creates todo and resets state", () => {

@@ -8,22 +8,34 @@ class LayoutRegistry {
     }
 
     getZoneByY(y) {
+        const bottomBuffer =
+            TODO_ITEM_HEIGHT;
+
         for (const z of this.zones.values()) {
-            if (y >= z.y && y <= z.y + z.height) return z;
+            if (
+                y >= z.y &&
+                y <= z.y + z.height + bottomBuffer
+            ) {
+                return z;
+            }
         }
     }
 
-    getIndex(zone, y, itemsIds = []) {
-        const localY = y - zone.y;
+    getIndex(zone, y, itemsIds = [], layouts = {}) {
+        for (let i = 0; i < itemsIds.length; i++) {
+            const layout = layouts[itemsIds[i]];
 
-        const clampedY = Math.max(0, localY);
+            if (!layout) continue;
 
-        const index = Math.round(clampedY / TODO_ITEM_HEIGHT);
+            const center =
+                layout.y + layout.height / 2;
 
-        return Math.max(
-            0,
-            Math.min(itemsIds.length, index)
-        );
+            if (y < center) {
+                return i;
+            }
+        }
+
+        return itemsIds.length;
     }
 
     clear() {
@@ -34,18 +46,4 @@ class LayoutRegistry {
 export const layoutRegistry = new LayoutRegistry();
 
 
-// getIndex(zone, y, itemsIds = []) {
-//
-//
-//     const localY = y - zone.y;
-//
-//     if (localY <= TODO_ITEM_HEIGHT / 2) {
-//         return 0;
-//     }
-//     const index = Math.floor(localY / TODO_ITEM_HEIGHT);
-//
-//     return Math.max(
-//         0,
-//         Math.min(itemsIds.length, index)
-//     );
-// }
+
