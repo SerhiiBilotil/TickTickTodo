@@ -2,6 +2,8 @@ import { create } from "zustand";
 import {Category, Todo, TodoState} from "@/entities/todo/model/types";
 
 
+
+
 export const useTodoStore = create<TodoState>((set, get) => ({
 
 
@@ -156,6 +158,30 @@ export const useTodoStore = create<TodoState>((set, get) => ({
             title: "Go jogging",
             description: "30-minute run in the evening",
             categoryId: "personal",
+        },
+        {
+            id: "13",
+            title: "Reply to emails",
+            description: "Clear inbox and respond to pending messages",
+            categoryId: "today",
+        },
+        {
+            id: "14",
+            title: "Finish project report",
+            description: "Complete final report and send to manager",
+            categoryId: "week",
+        },
+        {
+            id: "15",
+            title: "Reply to emails",
+            description: "Clear inbox and respond to pending messages",
+            categoryId: "today",
+        },
+        {
+            id: "16",
+            title: "Finish project report",
+            description: "Complete final report and send to manager",
+            categoryId: "week",
         },
     ],
 }));

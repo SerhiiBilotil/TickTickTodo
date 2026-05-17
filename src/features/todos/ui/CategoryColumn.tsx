@@ -6,15 +6,12 @@ import { Text } from "@/shared/ui/Text";
 import { TodoItem } from "./TodoItem";
 import { DropPlaceholder } from "@/features/todos/ui/DropPlaceholder";
 import { useDragState } from "@/features/drag-drop/model/useDragState";
-import { useDrag } from "@/features/drag-drop/model/DragProvider";
 import { useDragStore } from "@/store/drag.store";
 
 export const TodoCategoryColumn = ({ category, todos }) => {
-    const { preview } = useDrag();
+    const { categoryZones , previewCategory, previewIndex} = useDragState();
+    const active = previewCategory === category.id;
 
-    const active = preview?.category === category.id;
-
-    const { categoryZones } = useDragState();
     const zone = categoryZones?.[category.id];
 
     const setLayout = useDragStore((s) => s.setLayout);
@@ -24,16 +21,13 @@ export const TodoCategoryColumn = ({ category, todos }) => {
         if (!active) return -1;
 
         return Math.min(
-            Math.max(preview?.index ?? 0, 0),
+            Math.max(previewIndex ?? 0, 0),
             todos.length
         );
-    }, [active, preview?.index, todos.length]);
+    }, [active, previewIndex, todos.length]);
 
     return (
         <Box>
-
-
-
             <Box>
                 {todos.map((todo, i) => {
                     const showPlaceholderBefore = active && placeholderIndex === i;

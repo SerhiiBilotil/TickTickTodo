@@ -1,139 +1,110 @@
-import { useMemo } from "react";
-
+import { useEffect, useMemo } from "react";
 
 import { useDragStore } from "@/store/drag.store";
-import { useTodoStore } from "@/store/todo.store";
-
-
 import { useDragState } from "./useDragState";
-import { useTodoReorder } from "../../todos/model/useTodoReorder";
+import { useTodoReorder } from "../../todos/hooks/useTodoReorder";
 
-import { useDrag } from "@/features/drag-drop/model/DragProvider";
-import {createDragEngine} from "@/features/drag-drop/model/сreateDragEngine";
-import {resolveIndexByY, resolveZoneByY} from "@/features/drag-drop/lib/layoutRegistry";
-import {data} from "browserslist";
+import { createDragEngine } from "@/features/drag-drop/model/сreateDragEngine";
+import { resolveIndexByY, resolveZoneByY } from "@/features/drag-drop/lib/layoutRegistry";
+
+import { dragX, dragY, resetDragShared } from "./drag.shared";
+import {todoStore} from "@/features/todos/model/todo.store.helpers";
 
 export function useTodoDragController() {
     const engine = useMemo(() => createDragEngine(), []);
 
-    const {
-        x,
-        y,
-        overIndex,
-        overCategory,
-        setPreview,
-        reset: resetDragProvider,
-    } = useDrag();
+    const {startDrag, reset, setReordering, layouts, categoryZones, setPreview,} = useDragState();
 
-
-    const { startDrag, reset, setReordering, anchorY, anchorX, setAnchor, layouts,categoryZones } = useDragState();
     const { reorder, changeCategory } = useTodoReorder();
-    const titleHeight = 0
 
-    engine.setHandlers({
-        onGestureStart: (id, categoryId, e, ) => {
-            startDrag(id, categoryId);
+    useEffect(() => {
+        const zones = Object.values(categoryZones);
 
-
+        const getZoneData = (id: string, categoryId: string) => {
             const layout = layouts[id];
-            if (!layout || layout.height === 0) {return}
+            const zone = categoryZones[categoryId];
+            if (!layout || !zone) return null;
+            return { layout, zone };
+        };
 
-            const activeZone = categoryZones[categoryId];
+        const getCategoryItems = (categoryId: string) => {
+            return todoStore.todos
+                .filter(todo => todo.categoryId === categoryId)
+                .map(todo => todo.id);
+        };
 
-            x.value = layout.x
-            y.value = layout.y + activeZone.y + titleHeight
+        engine.setHandlers({
+            onGestureStart: (id, categoryId) => {
+                startDrag(id, categoryId);
 
-            const todos = useTodoStore.getState().todos;
+                const data = getZoneData(id, categoryId);
 
-            const inCategory = todos.filter(t => t.categoryId === categoryId);
+                if (!data) return;
 
-            const index = inCategory.findIndex(t => t.id === id);
+                const { layout, zone } = data;
 
-            setPreview({
-                category: categoryId,
-                index: index === -1 ? 0 : index,
-            });
+                dragX.value = layout.x;
+                dragY.value = layout.y + zone.y;
 
-        },
-        onDragStart: (id, categoryId, e, startX, startY) => {
+                const index = getCategoryItems(categoryId).findIndex(t => t === id);
 
+                setPreview(categoryId, Math.max(index, 0));
+            },
 
+            onMove: (id, categoryId, dx, dy) => {
+                const data = getZoneData(id, categoryId);
 
-        },
+                if (!data) return;
 
-        onMove: (id,categoryId, dx, dy,e) => {
-            const layout = layouts[id];
-            const activeZone = categoryZones[categoryId];
+                const { layout, zone } = data;
 
-            if (!layout) return;
+                dragX.value = layout.x + dx;
+                dragY.value = layout.y + dy + zone.y;
 
-            x.value = layout.x + dx;
-            y.value = layout.y + dy + activeZone.y + titleHeight
+                const centerY = dragY.value + layout.height / 2;
 
-            const draggedCenterY =  y.value + layout.height/2
+                const targetZone = resolveZoneByY(centerY, zones);
 
+                if (!targetZone) return;
 
-            const zone = resolveZoneByY(draggedCenterY, Object.values(categoryZones));
-            console.log('zones', zone)
-            if (!zone) return;
+                const items = getCategoryItems(targetZone.id);
 
-            const todos = useTodoStore.getState().todos;
+                const index = resolveIndexByY(centerY, items, id, layouts, targetZone);
 
-            const items = todos
-                .filter((t) => t.categoryId === zone.id)
-                .map((t) => t.id);
+                setPreview(targetZone.id, Math.max(index, 0));
+            },
 
-            const index = resolveIndexByY(draggedCenterY, items, id, layouts, zone,);
+            onEnd: (cancelled) => {
+                setReordering(true);
 
-            console.log('index', index);
-            overCategory.value = zone.id;
-            overIndex.value = index;
+                const finish = () => {
+                    reset();
+                    resetDragShared();
+                    setTimeout(() => setReordering(false), 200);
+                };
 
+                if (cancelled) return requestAnimationFrame(finish);
 
-            setPreview({
-                category: zone.id,
-                index,
-            });
-        },
+                const {activeId,
+                    fromCategory,
+                    previewCategory,
+                    previewIndex,
+                } = useDragStore.getState();
 
-        onEnd: (resetState) => {
-            setReordering(true);
+                if (!activeId || !previewCategory) {
+                    return requestAnimationFrame(finish);
+                }
 
-            console.log('reset', resetState);
+                if (fromCategory === previewCategory) {
+                    reorder(activeId, previewIndex, previewCategory);
+                } else {
+                    changeCategory(activeId, previewCategory, previewIndex);
+                }
 
-            const finish = () => {
-                reset();
-                resetDragProvider();
-                setTimeout(() => {
-                    setReordering(false);
-                }, 200)
-            };
-
-            if (resetState) {
                 requestAnimationFrame(finish);
-                return;
-            }
-
-            const { activeId, fromCategory } =
-                useDragStore.getState();
-
-            const targetCategory = overCategory.value;
-            const index = overIndex.value;
-
-            if (!activeId || !targetCategory) {
-                requestAnimationFrame(finish);
-                return;
-            }
-                console.log('reorder',activeId, index, targetCategory);
-            if (fromCategory === targetCategory) {
-                reorder(activeId, index, targetCategory);
-            } else {
-                changeCategory(activeId, targetCategory, index);
-            }
-
-            requestAnimationFrame(finish);
-        },
-    });
+            },
+        });
+    }, [layouts, categoryZones]);
 
     return { engine };
 }

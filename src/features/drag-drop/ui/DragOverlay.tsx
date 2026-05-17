@@ -4,15 +4,13 @@ import React, {useEffect} from "react";
 import { Box } from "@/shared/ui/Box";
 import { Text } from "@/shared/ui/Text";
 
-import { useDrag } from "@/features/drag-drop/model/DragProvider";
+
 import { useDragStore } from "@/store/drag.store";
 import { useTodoStore } from "@/store/todo.store";
 import {TODO_ITEM_HEIGHT} from "@/features/todos/constants";
-import {useLayoutResolver} from "@/features/drag-drop/model/useLayoutResolver";
-
+import {dragX, dragY} from "@/features/drag-drop/model/drag.shared";
 
 export const DragOverlay = () => {
-    const { x, y } = useDrag();
 
 
     const activeId = useDragStore((s) => s.activeId);
@@ -51,8 +49,8 @@ export const DragOverlay = () => {
             height: TODO_ITEM_HEIGHT,
             transform: visible
                 ? [
-                    { translateX: x.value },
-                    { translateY: y.value  },
+                    { translateX: dragX.value },
+                    { translateY: dragY.value  },
                     { scale: scale?.value },
                 ]
                 : [],

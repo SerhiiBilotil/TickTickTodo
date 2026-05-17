@@ -4,12 +4,6 @@ export function resolveZoneByY(
     y,
     categoryZones
 ) {
-    const bottomBuffer =
-        TODO_ITEM_HEIGHT;
-
-    console.log('data zones', y, categoryZones);
-
-
     for (const z of categoryZones.values()) {
         if (
             y >= z.y &&
@@ -19,8 +13,6 @@ export function resolveZoneByY(
         }
     }
 }
-
-
 
 export function resolveIndexByY(
     y,
@@ -33,11 +25,9 @@ export function resolveIndexByY(
 
     for (let i = 0; i < items.length; i++) {
         const layout = layouts[items[i]];
-        console.log('layout', layout);
         if (!layout) continue;
 
         const center = zone.y +  layout.y + 25;
-        console.log('yy', y, center)
         if (y < center) {
             index = i;
             break;

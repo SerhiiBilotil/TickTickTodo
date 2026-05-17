@@ -4,11 +4,6 @@ type DragState = {
     activeId: string | null;
     fromCategory: string | null;
     isReordering: boolean;
-    anchorX: number;
-    anchorY: number;
-    scrollContainerTop: number;
-    scrollY: number;
-    categoryLayouts: object;
     categoryZones: object;
 };
 type Layout = {
@@ -23,16 +18,14 @@ type CategoryLayout = {
 };
 type DragActions = {
     setReordering: (value: boolean) => void;
-    setScrollContainerTop: (value: number) => void;
-    setScrollY: (value: number) => void;
-    setAnchor: (x: number, y: number) => void;
     startDrag: (id: string, categoryId: string) => void;
     setActive: (id: string, categoryId: string) => void;
     layouts: Record<string, Layout>;
-
     setLayout: (id: string, layout: Layout) => void;
-    setCategoryLayout: (id: string, layout: CategoryLayout) => void;
     setCategoryZones: (id: string, layout: CategoryLayout) => void;
+    previewCategory: string | null;
+    previewIndex: number | null;
+    setPreview: (category: string | null, index: number | null) => void;
     reset: () => void;
 };
 
@@ -40,13 +33,16 @@ export const useDragStore = create<DragState & DragActions>((set) => ({
     activeId: null,
     fromCategory: null,
     isReordering: false,
-    anchorX: 0,
-    anchorY: 0,
     layouts: {},
-    scrollContainerTop: 0,
-    scrollY: 0,
-    categoryLayouts: {},
     categoryZones: {},
+    previewCategory: null,
+    previewIndex: null,
+
+    setPreview: (category, index) =>
+        set({
+            previewCategory: category,
+            previewIndex: index,
+        }),
 
     setCategoryZones: (id, layout) =>
         set((state) => ({
@@ -56,33 +52,13 @@ export const useDragStore = create<DragState & DragActions>((set) => ({
             },
         })),
 
-    setCategoryLayout: (
-        id: string,
-        layout: {
-            y: number;
-            height: number;
-        }
-    ) =>
+    setLayout: (id, layout) =>
         set((state) => ({
-            categoryLayouts: {
-                ...state.categoryLayouts,
+            layouts: {
+                ...state.layouts,
                 [id]: layout,
             },
         })),
-
-    setScrollContainerTop: (y: number) =>
-        set({ scrollContainerTop: y }),
-
-    setScrollY: (y: number) =>
-        set({ scrollY: y }),
-
-
-    setLayout: (id, layout) =>
-        set((state) => {
-            state.layouts[id] = layout;
-            return { layouts: state.layouts };
-        }),
-
 
     setReordering: (value) =>
         set({
@@ -100,17 +76,13 @@ export const useDragStore = create<DragState & DragActions>((set) => ({
             activeId: id,
         }),
 
-    reset: () =>
+    reset: () => {
         set({
             activeId: null,
             fromCategory: null,
-            anchorX: 0,
-            anchorY: 0,
-        }),
-    setAnchor: (x, y) =>
-        set({
-            anchorX: x,
-            anchorY: y,
-        }),
+            previewCategory: null,
+            previewIndex: null,
+        });
+    }
 
 }));

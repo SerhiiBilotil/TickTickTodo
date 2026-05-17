@@ -5,13 +5,6 @@ export function createDragEngine() {
     let startY = 0;
 
     let state = "idle";
-
-    let pointerStartX = 0;
-    let pointerStartY = 0;
-
-
-    let dragging = false;
-    let hasMoved = false;
     let activated = false;
 
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -21,13 +14,10 @@ export function createDragEngine() {
 
     let onGestureStart = (id: string, categoryId: string, e, startX: number, startY: number) => {};
     let onDragStart = (id: string, categoryId: string, e, startX: number, startY: number) => {};
-
     let onMove = (id ,dx: number, dy: number) => {};
     let onEnd = (resetState: boolean) => {};
 
     function start(id, categoryId, e) {
-        pointerStartX = e.absoluteX
-        pointerStartY = e.absoluteY
 
         activeId = id;
         fromCategory = categoryId;
@@ -93,8 +83,6 @@ export function createDragEngine() {
             timer = null;
         }
 
-        hasMoved = false;
-        dragging = false;
         activated = false;
 
         activeId = null;
