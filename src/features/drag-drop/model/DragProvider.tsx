@@ -7,9 +7,6 @@ export const DragProvider = ({ children }) => {
     const x = useSharedValue(0);
     const y = useSharedValue(0);
     const scrollYRef = useRef(0);
-    const setScrollY = (y) => {
-        scrollYRef.current = y;
-    };
     const overIndex = useSharedValue(null);
     const overCategory = useSharedValue(null);
 
@@ -42,7 +39,6 @@ export const DragProvider = ({ children }) => {
                 preview,
                 setPreview,
                 scrollYRef,
-                setScrollY,
                 reset,
             }}
         >

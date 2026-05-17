@@ -5,11 +5,17 @@ export function useDragState() {
     const reset = useDragStore((s) => s.reset);
     const setReordering = useDragStore((s) => s.setReordering);
     const layouts = useDragStore((s) => s.layouts);
-    const needsLayoutSync = useDragStore((s) => s.needsLayoutSync);
-    const setNeedsLayoutSync = useDragStore((s) => s.setNeedsLayoutSync);
     const anchorX = useDragStore((s) => s.anchorX);
     const anchorY = useDragStore((s) => s.anchorY);
     const setAnchor = useDragStore((s) => s.setAnchor);
+
+
+    const scrollContainerTop = useDragStore((s) => s.scrollContainerTop);
+    const scrollOffset = useDragStore((s) => s.scrollY);
+    const categoryLayouts = useDragStore((s) => s.categoryLayouts);
+    const setCategoryLayout = useDragStore((s) => s.setCategoryLayout);
+    const categoryZones = useDragStore((s) => s.categoryZones);
+
 
     return {
         startDrag,
@@ -20,7 +26,12 @@ export function useDragState() {
         anchorY,
         setAnchor,
         layouts,
-        needsLayoutSync,
-        setNeedsLayoutSync
+        //content coord
+        scrollContainerTop,
+        scrollOffset,
+        categoryLayouts,
+        setCategoryLayout,
+        categoryZones,
+
     };
 }

@@ -1,49 +1,48 @@
 import {TODO_ITEM_HEIGHT} from "@/features/todos/constants";
 
-class LayoutRegistry {
-    zones = new Map();
+export function resolveZoneByY(
+    y,
+    categoryZones
+) {
+    const bottomBuffer =
+        TODO_ITEM_HEIGHT;
 
-    registerZone(zone) {
-        this.zones.set(zone.id, zone);
-    }
+    console.log('data zones', y, categoryZones);
 
-    getZoneByY(y) {
-        const bottomBuffer =
-            TODO_ITEM_HEIGHT;
 
-        for (const z of this.zones.values()) {
-            if (
-                y >= z.y &&
-                y <= z.y + z.height + bottomBuffer
-            ) {
-                return z;
-            }
+    for (const z of categoryZones.values()) {
+        if (
+            y >= z.y &&
+            y <= z.y + z.height
+        ) {
+            return z;
         }
-    }
-
-    getIndex(zone, y, itemsIds = [], layouts = {}) {
-        for (let i = 0; i < itemsIds.length; i++) {
-            const layout = layouts[itemsIds[i]];
-
-            if (!layout) continue;
-
-            const center =
-                layout.y + layout.height / 2;
-
-            if (y < center) {
-                return i;
-            }
-        }
-
-        return itemsIds.length;
-    }
-
-    clear() {
-        this.zones.clear();
     }
 }
 
-export const layoutRegistry = new LayoutRegistry();
 
 
+export function resolveIndexByY(
+    y,
+    items = [],
+    activeId,
+    layouts = {},
+    zone,
+) {
+    let index = items.length;
 
+    for (let i = 0; i < items.length; i++) {
+        const layout = layouts[items[i]];
+        console.log('layout', layout);
+        if (!layout) continue;
+
+        const center = zone.y +  layout.y + 25;
+        console.log('yy', y, center)
+        if (y < center) {
+            index = i;
+            break;
+        }
+    }
+
+    return index;
+}

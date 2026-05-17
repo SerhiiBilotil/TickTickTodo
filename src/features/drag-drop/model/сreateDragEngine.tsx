@@ -4,6 +4,12 @@ export function createDragEngine() {
     let startX = 0;
     let startY = 0;
 
+    let state = "idle";
+
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+
+
     let dragging = false;
     let hasMoved = false;
     let activated = false;
@@ -13,60 +19,58 @@ export function createDragEngine() {
     let activeId: string | null = null;
     let fromCategory: string | null = null;
 
-    let onGestureStart = () => {};
+    let onGestureStart = (id: string, categoryId: string, e, startX: number, startY: number) => {};
     let onDragStart = (id: string, categoryId: string, e, startX: number, startY: number) => {};
 
-    let onMove = (x: number, y: number) => {};
+    let onMove = (id ,dx: number, dy: number) => {};
     let onEnd = (resetState: boolean) => {};
 
     function start(id, categoryId, e) {
-
-        startX = e.absoluteX;
-        startY = e.absoluteY;
+        pointerStartX = e.absoluteX
+        pointerStartY = e.absoluteY
 
         activeId = id;
         fromCategory = categoryId;
 
-        dragging = false;
-        hasMoved = false;
-        activated = false;
+        state = "pressing";
+
+        onGestureStart(
+            activeId!,
+            fromCategory!,
+            e,
+            startX,
+            startY
+        );
 
         timer = setTimeout(() => {
             activated = true;
-            onDragStart(
-                activeId!,
-                fromCategory!,
-                e,
-                startX,
-                startY
-            );
-        }, 500);
+        }, 250);
     }
 
-    function move(e) {
-        const dx = e.absoluteX - startX;
-        const dy = e.absoluteY - startY;
+    function move(id,categoryId, e) {
+        const dx = e.translationX ;
+        const dy = e.translationY ;
+       console.log('dy', dy)
 
         if (
             activated &&
-            !dragging &&
-            Math.hypot(dx, dy) > 8
+            state !== "dragging"
         ) {
-            dragging = true;
-            hasMoved = true;
+            state = "dragging";
 
             onDragStart(
                 activeId!,
-                fromCategory!,
-                e,
-                startX,
-                startY
+                 fromCategory!,
+                 0,
+                 0,
+                 e.absoluteX,
+                 e.absoluteY,
             );
         }
 
-        if (!dragging) return;
+        if (state !== "dragging") return;
 
-        onMove(e.absoluteX, e.absoluteY);
+        onMove(id,categoryId, dx, dy, e);
     }
 
     function end() {
@@ -75,17 +79,12 @@ export function createDragEngine() {
             timer = null;
         }
 
-        if (!dragging || !hasMoved) {
-            onEnd(true);
-            return;
-        }
+        onEnd(state !== "dragging");
 
-        onEnd(false);
+        state = "idle";
 
-        dragging = false;
         activeId = null;
         fromCategory = null;
-        activated = false;
     }
 
     function cancel() {

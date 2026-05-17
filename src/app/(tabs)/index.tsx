@@ -32,8 +32,8 @@ export default function Dashboard() {
 
     return (
         <Screen>
+
             <TodoBoard />
-            <DragOverlay />
 
             <FloatingButton onPress={() => openCreateModal(true)} />
 

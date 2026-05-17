@@ -4,12 +4,14 @@ import { useMemo } from "react";
 import { useDragStore } from "@/store/drag.store";
 import { useTodoStore } from "@/store/todo.store";
 
-import { useLayoutResolver } from "./useLayoutResolver";
+
 import { useDragState } from "./useDragState";
 import { useTodoReorder } from "../../todos/model/useTodoReorder";
 
 import { useDrag } from "@/features/drag-drop/model/DragProvider";
 import {createDragEngine} from "@/features/drag-drop/model/сreateDragEngine";
+import {resolveIndexByY, resolveZoneByY} from "@/features/drag-drop/lib/layoutRegistry";
+import {data} from "browserslist";
 
 export function useTodoDragController() {
     const engine = useMemo(() => createDragEngine(), []);
@@ -20,54 +22,59 @@ export function useTodoDragController() {
         overIndex,
         overCategory,
         setPreview,
-        scrollYRef,
         reset: resetDragProvider,
     } = useDrag();
 
-    const { resolveZone, resolveIndex } = useLayoutResolver();
-    const { startDrag, reset, setReordering, anchorY, anchorX, setAnchor, layouts, setNeedsLayoutSync} = useDragState();
+
+    const { startDrag, reset, setReordering, anchorY, anchorX, setAnchor, layouts,categoryZones } = useDragState();
     const { reorder, changeCategory } = useTodoReorder();
+    const titleHeight = 0
 
     engine.setHandlers({
-        onGestureStart: () => {
-
-        },
-        onDragStart: (id, categoryId, e, startX, startY) => {
+        onGestureStart: (id, categoryId, e, ) => {
             startDrag(id, categoryId);
 
+
             const layout = layouts[id];
-            if (!layout) return;
+            if (!layout || layout.height === 0) {return}
 
+            const activeZone = categoryZones[categoryId];
 
-            setAnchor(
-                e.absoluteX - layout.x,
-                e.absoluteY - layout.y
-            );
-
-            x.value = startX;
-            y.value =  startY;
+            x.value = layout.x
+            y.value = layout.y + activeZone.y + titleHeight
 
             const todos = useTodoStore.getState().todos;
 
-            const inCategory = todos.filter(
-                t => t.categoryId === categoryId
-            );
+            const inCategory = todos.filter(t => t.categoryId === categoryId);
 
-            const index = inCategory.findIndex(
-                t => t.id === id
-            );
+            const index = inCategory.findIndex(t => t.id === id);
 
             setPreview({
                 category: categoryId,
                 index: index === -1 ? 0 : index,
             });
+
+        },
+        onDragStart: (id, categoryId, e, startX, startY) => {
+
+
+
         },
 
-        onMove: (px, py) => {
-            x.value = px;
-            y.value = py;
+        onMove: (id,categoryId, dx, dy,e) => {
+            const layout = layouts[id];
+            const activeZone = categoryZones[categoryId];
 
-            const zone = resolveZone(py);
+            if (!layout) return;
+
+            x.value = layout.x + dx;
+            y.value = layout.y + dy + activeZone.y + titleHeight
+
+            const draggedCenterY =  y.value + layout.height/2
+
+
+            const zone = resolveZoneByY(draggedCenterY, Object.values(categoryZones));
+            console.log('zones', zone)
             if (!zone) return;
 
             const todos = useTodoStore.getState().todos;
@@ -76,8 +83,9 @@ export function useTodoDragController() {
                 .filter((t) => t.categoryId === zone.id)
                 .map((t) => t.id);
 
-            const index = resolveIndex(zone, py, items);
+            const index = resolveIndexByY(draggedCenterY, items, id, layouts, zone,);
 
+            console.log('index', index);
             overCategory.value = zone.id;
             overIndex.value = index;
 
@@ -90,37 +98,40 @@ export function useTodoDragController() {
 
         onEnd: (resetState) => {
             setReordering(true);
-            if(resetState){
+
+            console.log('reset', resetState);
+
+            const finish = () => {
                 reset();
                 resetDragProvider();
-                requestAnimationFrame(() => {
-                    setTimeout(() => setReordering(false),0);
-                });
-                return
+                setTimeout(() => {
+                    setReordering(false);
+                }, 200)
+            };
+
+            if (resetState) {
+                requestAnimationFrame(finish);
+                return;
             }
 
-            const { activeId, fromCategory } = useDragStore.getState();
+            const { activeId, fromCategory } =
+                useDragStore.getState();
 
             const targetCategory = overCategory.value;
             const index = overIndex.value;
 
-            if (!activeId || !targetCategory) return;
-
+            if (!activeId || !targetCategory) {
+                requestAnimationFrame(finish);
+                return;
+            }
+                console.log('reorder',activeId, index, targetCategory);
             if (fromCategory === targetCategory) {
                 reorder(activeId, index, targetCategory);
             } else {
                 changeCategory(activeId, targetCategory, index);
             }
 
-            reset();
-            resetDragProvider();
-
-            requestAnimationFrame(() => {
-                setTimeout(() => setReordering(false),0);
-                setTimeout(() => {
-                    setNeedsLayoutSync(Date.now());
-                }, 250);
-            });
+            requestAnimationFrame(finish);
         },
     });
 

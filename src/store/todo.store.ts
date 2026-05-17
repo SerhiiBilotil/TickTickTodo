@@ -92,6 +92,12 @@ export const useTodoStore = create<TodoState>((set, get) => ({
             categoryId: "today",
         },
         {
+            id: "2",
+            title: "Buy groceries",
+            description: "Milk, eggs, bread, vegetables",
+            categoryId: "today",
+        },
+        {
             id: "3",
             title: "Reply to emails",
             description: "Clear inbox and respond to pending messages",
@@ -124,6 +130,30 @@ export const useTodoStore = create<TodoState>((set, get) => ({
         {
             id: "8",
             title: "Go jogging 2",
+            description: "30-minute run in the evening",
+            categoryId: "personal",
+        },
+        {
+            id: "9",
+            title: "Finish project report",
+            description: "Complete final report and send to manager",
+            categoryId: "week",
+        },
+        {
+            id: "10",
+            title: "Team meeting preparation",
+            description: "Prepare slides and agenda for Monday meeting",
+            categoryId: "week",
+        },
+        {
+            id: "11",
+            title: "Read book",
+            description: "Continue reading 'Deep Work'",
+            categoryId: "personal",
+        },
+        {
+            id: "12",
+            title: "Go jogging",
             description: "30-minute run in the evening",
             categoryId: "personal",
         },

@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useRef} from "react";
 import { ScrollView } from "react-native";
 
 import { Box } from "@/shared/ui/Box";
@@ -11,16 +11,34 @@ import {DragOverlay} from "@/features/drag-drop/ui/DragOverlay";
 import {useSharedValue} from "react-native-reanimated";
 import {DropZone} from "@/features/todos/ui/DropZone";
 import {useDrag} from "@/features/drag-drop/model/DragProvider";
+import {useDragStore} from "@/store/drag.store";
 
 export const TodoBoard = () => {
     const todos = useTodoStore((state) => state.todos);
     const categories = useTodoStore((state) => state.categories);
     const grouped = selectGroupedTodos(todos, categories);
-    const { setScrollY, preview } = useDrag();
+    const {  preview } = useDrag();
 
+
+    const scrollRef = useRef(null);
+
+
+    const setScrollContainerTop = useDragStore((s) => s.setScrollContainerTop);
+    const setScrollY = useDragStore((s) => s.setScrollY);
+
+    useEffect(() => {
+        setTimeout(() => {
+            scrollRef.current?.measureInWindow(
+                (x, y) => {
+                    setScrollContainerTop(y);
+                }
+            );
+        }, 0);
+    }, []);
 
     return (
         <ScrollView
+                    ref={scrollRef}
                     contentContainerStyle={{ padding: 16 }}
                     scrollEnabled={true}
                     nestedScrollEnabled={false}
@@ -31,21 +49,29 @@ export const TodoBoard = () => {
                     }}
 
         >
+            <Text variant="title" marginBottom="m">
+                My Tasks
+            </Text>
             <Box>
-                <Text variant="title" marginBottom="m">
-                    My Tasks
-                </Text>
 
                 {grouped.map((category) => (
-                    <DropZone key={category.id} categoryId={category.id}>
-                        <TodoCategoryColumn
-                            category={category}
-                            todos={category.todos}
-                        />
-                    </DropZone>
-                ))}
+                    <>
+                        <Text variant="categoryTitle" marginBottom="s">
+                            {category.title}
+                        </Text>
+                        <DropZone key={category.id} categoryId={category.id}>
 
+                            <TodoCategoryColumn
+                                category={category}
+                                todos={category.todos}
+                            />
+                        </DropZone>
+                    </>
+
+                ))}
+                <DragOverlay />
             </Box>
+
         </ScrollView>
     );
 };

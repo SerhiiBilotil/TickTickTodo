@@ -10,9 +10,11 @@ export const DropPlaceholder = ({ index, categoryId }) => {
 
     const style = useAnimatedStyle(() => {
         return {
-            height: TODO_ITEM_HEIGHT,
+            height: TODO_ITEM_HEIGHT ,
         };
     });
+
+
 
     return (
         <Animated.View

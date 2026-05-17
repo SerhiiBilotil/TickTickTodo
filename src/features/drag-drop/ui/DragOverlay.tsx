@@ -8,17 +8,16 @@ import { useDrag } from "@/features/drag-drop/model/DragProvider";
 import { useDragStore } from "@/store/drag.store";
 import { useTodoStore } from "@/store/todo.store";
 import {TODO_ITEM_HEIGHT} from "@/features/todos/constants";
+import {useLayoutResolver} from "@/features/drag-drop/model/useLayoutResolver";
 
 
 export const DragOverlay = () => {
     const { x, y } = useDrag();
 
+
     const activeId = useDragStore((s) => s.activeId);
     const layouts = useDragStore((s) => s.layouts);
     const layout = activeId ? layouts[activeId] : null;
-
-    const anchorX = useDragStore((s) => s.anchorX);
-    const anchorY = useDragStore((s) => s.anchorY);
 
     const todos = useTodoStore((s) => s.todos);
 
@@ -43,18 +42,17 @@ export const DragOverlay = () => {
     const style = useAnimatedStyle(() => {
         const visible = !!activeId;
 
-
         return {
             position: "absolute",
             left: 0,
             zIndex: 999,
             opacity: visible ? 1 : 0,
             width: layout?.width,
-            height: layout?.height,
+            height: TODO_ITEM_HEIGHT,
             transform: visible
                 ? [
-                    { translateX: x.value - anchorX },
-                    { translateY: y.value - anchorY - 50 },
+                    { translateX: x.value },
+                    { translateY: y.value  },
                     { scale: scale?.value },
                 ]
                 : [],
@@ -68,8 +66,8 @@ export const DragOverlay = () => {
     return (
         <Animated.View pointerEvents="none" style={style}>
             <Box
-                width={layout.width}
-                height={layout.height}
+                width={layout?.width}
+                height={TODO_ITEM_HEIGHT}
                 style={{ flex: 0,  justifyContent: "center",paddingHorizontal: 12 }}
                 borderRadius="m"
                 backgroundColor="card"
