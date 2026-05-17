@@ -1,33 +1,6 @@
 import { create } from "zustand";
+import {DragActions, DragState} from '@/features/drag-drop/model/type'
 
-type DragState = {
-    activeId: string | null;
-    fromCategory: string | null;
-    isReordering: boolean;
-    categoryZones: object;
-};
-type Layout = {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-};
-type CategoryLayout = {
-    y: number;
-    height: number;
-};
-type DragActions = {
-    setReordering: (value: boolean) => void;
-    startDrag: (id: string, categoryId: string) => void;
-    setActive: (id: string, categoryId: string) => void;
-    layouts: Record<string, Layout>;
-    setLayout: (id: string, layout: Layout) => void;
-    setCategoryZones: (id: string, layout: CategoryLayout) => void;
-    previewCategory: string | null;
-    previewIndex: number | null;
-    setPreview: (category: string | null, index: number | null) => void;
-    reset: () => void;
-};
 
 export const useDragStore = create<DragState & DragActions>((set) => ({
     activeId: null,

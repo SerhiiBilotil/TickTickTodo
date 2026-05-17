@@ -1,58 +1,55 @@
 import React, { useMemo } from "react";
-import { View } from "react-native";
-
+import { View, LayoutChangeEvent } from "react-native";
 import { Box } from "@/shared/ui/Box";
-import { Text } from "@/shared/ui/Text";
 import { TodoItem } from "./TodoItem";
 import { DropPlaceholder } from "@/features/todos/ui/DropPlaceholder";
-import { useDragState } from "@/features/drag-drop/model/useDragState";
+import { useDragState } from "@/features/drag-drop/hooks/useDragState";
 import { useDragStore } from "@/store/drag.store";
+import { Category, Todo } from "@/features/todos/model/type";
 
-export const TodoCategoryColumn = ({ category, todos }) => {
-    const { categoryZones , previewCategory, previewIndex} = useDragState();
+type Props = {
+    category: Category;
+    todos: Todo[];
+};
+
+export const TodoCategoryColumn = ({ category, todos }: Props) => {
+    const { previewCategory, previewIndex } = useDragState();
+
     const active = previewCategory === category.id;
 
-    const zone = categoryZones?.[category.id];
-
-    const setLayout = useDragStore((s) => s.setLayout);
-
+    const setLayout = useDragStore(s => s.setLayout);
 
     const placeholderIndex = useMemo(() => {
+
         if (!active) return -1;
 
-        return Math.min(
-            Math.max(previewIndex ?? 0, 0),
-            todos.length
-        );
+        return Math.min(Math.max(previewIndex ?? 0, 0), todos.length);
+
     }, [active, previewIndex, todos.length]);
+
+    const handleLayout = (id: string, e: LayoutChangeEvent) => {
+        const { x, y, width, height } = e.nativeEvent.layout;
+
+        setLayout(id, { x, y, width, height });
+    };
 
     return (
         <Box>
             <Box>
-                {todos.map((todo, i) => {
-                    const showPlaceholderBefore = active && placeholderIndex === i;
+                {todos.map((todo, index) => {
+                    const showPlaceholderBefore =
+                        active && placeholderIndex === index;
 
                     return (
                         <React.Fragment key={todo.id}>
                             {showPlaceholderBefore && (
                                 <DropPlaceholder
-                                    index={i}
+                                    index={index}
                                     categoryId={category.id}
                                 />
                             )}
 
-                            <View
-                                onLayout={(e) => {
-                                    const layout = e.nativeEvent.layout;
-
-                                    setLayout(todo.id, {
-                                        x: layout.x,
-                                        y: layout.y,
-                                        width: layout.width,
-                                        height: layout.height,
-                                    });
-                                }}
-                            >
+                            <View onLayout={e => handleLayout(todo.id, e)}>
                                 <TodoItem todo={todo} />
                             </View>
                         </React.Fragment>

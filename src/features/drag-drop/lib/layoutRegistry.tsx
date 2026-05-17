@@ -1,38 +1,62 @@
-import {TODO_ITEM_HEIGHT} from "@/features/todos/constants";
+import { TODO_ITEM_HEIGHT } from "@/features/todos/constants";
+import {Zone} from "@/features/drag-drop/model/type";
+import {Layout} from "@/features/drag-drop/model/type";
 
-export function resolveZoneByY(
-    y,
-    categoryZones
-) {
-    for (const z of categoryZones.values()) {
-        if (
-            y >= z.y &&
-            y <= z.y + z.height
-        ) {
-            return z;
+
+type LayoutsMap = Record<string, Layout>;
+
+export const resolveZoneByY = (
+    y: number,
+    categoryZones: Map<string, Zone>,
+): Zone | null => {
+    for (const zone of categoryZones.values()) {
+        const zoneTop = zone.y;
+
+        const zoneBottom =
+            zoneTop + zone.height;
+
+        const isInsideZone =
+            y >= zoneTop &&
+            y <= zoneBottom;
+
+        if (isInsideZone) {
+            return zone;
         }
     }
-}
 
-export function resolveIndexByY(
-    y,
-    items = [],
-    activeId,
-    layouts = {},
-    zone,
-) {
-    let index = items.length;
+    return null;
+};
 
-    for (let i = 0; i < items.length; i++) {
-        const layout = layouts[items[i]];
-        if (!layout) continue;
+export const resolveIndexByY = (
+    y: number,
+    items: string[] = [],
+    activeId: string,
+    layouts: LayoutsMap = {},
+    zone: Zone,
+): number => {
+    let targetIndex = items.length;
 
-        const center = zone.y +  layout.y + 25;
-        if (y < center) {
-            index = i;
+    for (const [index, itemId] of items.entries()) {
+        const layout = layouts[itemId];
+
+        if (!layout) {
+            continue;
+        }
+
+        const itemTop =
+            zone.y + layout.y;
+
+        const itemCenterY =
+            itemTop + TODO_ITEM_HEIGHT / 2;
+
+        const shouldInsertBefore =
+            y < itemCenterY;
+
+        if (shouldInsertBefore) {
+            targetIndex = index;
             break;
         }
     }
 
-    return index;
-}
+    return targetIndex;
+};

@@ -1,37 +1,24 @@
-import React, {useEffect, useMemo, useRef, useState} from "react";
-import Animated, {
-    EntryExitTransition,
-    FadeIn,
-    FadeOut,
-    FadingTransition,
-    LinearTransition,
-    runOnJS,
-    useAnimatedStyle
-} from "react-native-reanimated";
-import {Gesture, GestureDetector} from "react-native-gesture-handler";
-
+import React, { useMemo, useRef } from "react";
+import { StyleSheet, View } from "react-native";
+import Animated, {LinearTransition, runOnJS, useAnimatedStyle,} from "react-native-reanimated";
+import {Gesture, GestureDetector,} from "react-native-gesture-handler";
 import { Box } from "@/shared/ui/Box";
 import { Text } from "@/shared/ui/Text";
+import { useDragStore } from "@/store/drag.store";
+import { TODO_ITEM_HEIGHT } from "@/features/todos/constants";
+import { useTodoDrag } from "@/features/drag-drop/hooks/useTodoDrag";
+import { Todo } from "@/features/todos/model/type";
 
-import { useTodoDragController } from "../../drag-drop/model/useTodoDragController";
-import {useDragStore} from "@/store/drag.store";
-import {TODO_ITEM_HEIGHT} from "@/features/todos/constants";
-import {View} from "react-native";
-import {useDragState} from "@/features/drag-drop/model/useDragState";
+type Props = {
+    todo: Todo;
+};
 
+export const TodoItem = ({ todo }: Props) => {
+    const drag = useTodoDrag();
 
-
-export const TodoItem = ({ todo }) => {
-    const { engine } = useTodoDragController();
-
-
-    const itemRef = useRef(null);
-
-
-    const activeTodoId = useDragStore((s) => s.activeId);
-    const isReordering = useDragStore((s) => s.isReordering);
-
-
+    const itemRef = useRef<View>(null);
+    const activeTodoId = useDragStore(s => s.activeId);
+    const isReordering = useDragStore(s => s.isReordering);
     const isActive = activeTodoId === todo.id;
 
     const style = useAnimatedStyle(() => ({
@@ -43,51 +30,57 @@ export const TodoItem = ({ todo }) => {
 
     const gesture = useMemo(() =>
             Gesture.Pan()
-                .onBegin((e) => {
-                    runOnJS(engine.start)(todo.id, todo.categoryId, e, );
+                .onBegin(() => {
+                    runOnJS(drag.start)(
+                        todo.id,
+                        todo.categoryId,
+                    );
                 })
-                .onUpdate((e) => {
-                    runOnJS(engine.move)(todo.id,todo.categoryId, e);
+                .onUpdate(e => {
+                    runOnJS(drag.move)(
+                        todo.id,
+                        todo.categoryId,
+                        e.translationX,
+                        e.translationY,
+                    );
                 })
                 .onFinalize(() => {
-                    runOnJS(engine.end)();
-                })
-        , [engine]);
-
-
+                    runOnJS(drag.end)(false);
+                }),
+        [drag]);
 
     return (
         <GestureDetector gesture={gesture}>
             <Animated.View
                 ref={itemRef}
-                layout={
-                    isReordering
-                        ? undefined
-                        : LinearTransition
-                }
-
                 collapsable={false}
+                layout={isReordering ? undefined : LinearTransition}
                 style={style}
             >
-                <Box paddingHorizontal="m"  borderRadius="m" backgroundColor="card" style={styles.content}>
-                    <Text numberOfLines={1} ellipsizeMode="tail">{todo.title}</Text>
+                <Box
+                    paddingHorizontal="m"
+                    borderRadius="m"
+                    backgroundColor="card"
+                    style={styles.content}
+                >
+                    <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                    >
+                        {todo.title}
+                    </Text>
                 </Box>
             </Animated.View>
         </GestureDetector>
     );
 };
 
-const styles = {
-    container: {
-        height: TODO_ITEM_HEIGHT,
-        overflow: "hidden",
-    },
-
+const styles = StyleSheet.create({
     content: {
         flex: 1,
         justifyContent: "center",
         backgroundColor: "card",
         borderRadius: 12,
         paddingHorizontal: 12,
-    }
-};
+    },
+});

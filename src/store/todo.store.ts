@@ -1,67 +1,36 @@
 import { create } from "zustand";
-import {Category, Todo, TodoState} from "@/entities/todo/model/types";
+import { Todo, TodoState} from "@/entities/todo/model/types";
+import {moveTodo} from "@/features/todos/lib/todo.utils";
 
 
 
 
 export const useTodoStore = create<TodoState>((set, get) => ({
 
-
-    setTodos: (todos) => set({ todos }),
-
-    setCategories: (categories) => set({ categories }),
-
-    reorderTodos: (id, index, categoryId) => {
-        set((state) => {
-            const list = [...state.todos];
-
-            const fromIndex = list.findIndex(t => t.id === id);
-            if (fromIndex === -1) return state;
-
-            const item = list[fromIndex];
-
-            list.splice(fromIndex, 1);
-
-            const categoryItems = list.filter(t => t.categoryId === categoryId);
-
-            const others = list.filter(t => t.categoryId !== categoryId);
-
-            const safeIndex = Math.max(0, Math.min(index, categoryItems.length));
-
-            categoryItems.splice(safeIndex, 0, item);
-
-            return {
-                todos: [...others, ...categoryItems],
-            };
-        });
+    reorderTodos: (id: string, index: number, categoryId: string,) => {
+        set((state: TodoState) => ({
+            todos: moveTodo(
+                state.todos,
+                id,
+                categoryId,
+                index,
+            ),
+        }));
     },
 
-    moveTodoToCategory: (id, categoryId, index) => {
-        set((state) => {
-            const list = [...state.todos];
-
-            const fromIndex = list.findIndex(t => t.id === id);
-            if (fromIndex === -1) return state;
-
-            const item = { ...list[fromIndex], categoryId };
-
-            list.splice(fromIndex, 1);
-
-            const categoryItems = list.filter(t => t.categoryId === categoryId);
-            const others = list.filter(t => t.categoryId !== categoryId);
-
-            const safeIndex = Math.max(0, Math.min(index, categoryItems.length));
-
-            categoryItems.splice(safeIndex, 0, item);
-
-            return {
-                todos: [...others, ...categoryItems],
-            };
-        });
+    moveTodoToCategory: (id: string, categoryId: string, index: number,) => {
+        set((state: TodoState) => ({
+            todos: moveTodo(
+                state.todos,
+                id,
+                categoryId,
+                index,
+            ),
+        }));
     },
 
-    addTodoItem: (todo) =>
-        set((state) => ({
+    addTodoItem: (todo: Omit<Todo, "id">,) =>
+        set((state: TodoState) => ({
             todos: [
                 ...state.todos,
                 {

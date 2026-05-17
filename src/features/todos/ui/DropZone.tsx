@@ -1,23 +1,30 @@
-import React, { useEffect } from "react";
-import { View } from "react-native";
-import { layoutRegistry } from "@/features/drag-drop/lib/layoutRegistry";
-import {useDragStore} from "@/store/drag.store";
+import React, { ReactNode, useRef } from "react";
+import { View, LayoutChangeEvent } from "react-native";
+import { useDragStore } from "@/store/drag.store";
 
-export const DropZone = ({ categoryId, children }) => {
-    const ref = React.useRef(null);
+type Props = {
+    categoryId: string;
+    children: ReactNode;
+};
+
+export const DropZone = ({ categoryId, children }: Props) => {
+    const ref = useRef<View>(null);
+
     const setCategoryZones =
-        useDragStore((s) => s.setCategoryZones);
+        useDragStore(s => s.setCategoryZones);
 
-    const onLayout = (e) => {
+    const onLayout = (e: LayoutChangeEvent) => {
+        const { y, height } = e.nativeEvent.layout;
+
         setCategoryZones(categoryId, {
             id: categoryId,
-            y: e.nativeEvent.layout.y,
-            height: e.nativeEvent.layout.height,
+            y,
+            height,
         });
     };
 
     return (
-        <View onLayout={onLayout} ref={ref}>
+        <View ref={ref} onLayout={onLayout}>
             {children}
         </View>
     );
