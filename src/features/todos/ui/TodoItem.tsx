@@ -1,7 +1,17 @@
 import React, { useMemo, useRef } from "react";
 import { StyleSheet, View } from "react-native";
-import Animated, {LinearTransition, runOnJS, useAnimatedStyle,} from "react-native-reanimated";
-import {Gesture, GestureDetector,} from "react-native-gesture-handler";
+import Animated, {
+    LinearTransition,
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
+} from "react-native-reanimated";
+import {
+    Gesture,
+    GestureDetector,
+} from "react-native-gesture-handler";
+
 import { Box } from "@/shared/ui/Box";
 import { Text } from "@/shared/ui/Text";
 import { useDragStore } from "@/store/drag.store";
@@ -17,37 +27,69 @@ export const TodoItem = ({ todo }: Props) => {
     const drag = useTodoDrag();
 
     const itemRef = useRef<View>(null);
+
     const activeTodoId = useDragStore(s => s.activeId);
     const isReordering = useDragStore(s => s.isReordering);
+
     const isActive = activeTodoId === todo.id;
+
+    const scale = useSharedValue(1);
+    const isDragging = useSharedValue(false);
 
     const style = useAnimatedStyle(() => ({
         opacity: isActive ? 0 : 1,
         height: isActive ? 0 : TODO_ITEM_HEIGHT,
         zIndex: isActive ? 10 : 1,
         marginBottom: isActive ? 0 : 8,
+        transform: [
+            {
+                scale: scale.value,
+            },
+        ],
     }));
 
-    const gesture = useMemo(() =>
-            Gesture.Pan()
-                .onBegin(() => {
-                    runOnJS(drag.start)(
-                        todo.id,
-                        todo.categoryId,
-                    );
-                })
-                .onUpdate(e => {
-                    runOnJS(drag.move)(
-                        todo.id,
-                        todo.categoryId,
-                        e.translationX,
-                        e.translationY,
-                    );
-                })
-                .onFinalize(() => {
-                    runOnJS(drag.end)(false);
-                }),
-        [drag]);
+    const longPress = Gesture.LongPress()
+        .minDuration(250)
+        .onStart(() => {
+            isDragging.value = true;
+
+            scale.value = withTiming(1.05, {
+                duration: 150,
+            });
+
+            runOnJS(drag.start)(
+                todo.id,
+                todo.categoryId,
+            );
+        });
+
+    const pan = Gesture.Pan()
+        .onUpdate(e => {
+            if (!isDragging.value) return;
+
+            runOnJS(drag.move)(
+                todo.id,
+                todo.categoryId,
+                e.translationX,
+                e.translationY,
+            );
+        })
+        .onFinalize(() => {
+            if (!isDragging.value) return;
+
+            isDragging.value = false;
+
+            scale.value = withTiming(1, {
+                duration: 150,
+            });
+
+            runOnJS(drag.end)(false);
+        });
+
+    const gesture = Gesture.Simultaneous(
+        longPress,
+        pan,
+    );
 
     return (
         <GestureDetector gesture={gesture}>
