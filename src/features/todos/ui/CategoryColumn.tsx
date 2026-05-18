@@ -6,13 +6,15 @@ import { DropPlaceholder } from "@/features/todos/ui/DropPlaceholder";
 import { useDragState } from "@/features/drag-drop/hooks/useDragState";
 import { useDragStore } from "@/store/drag.store";
 import { Category, Todo } from "@/features/todos/model/type";
+import { GestureType } from "react-native-gesture-handler";
 
 type Props = {
     category: Category;
     todos: Todo[];
+    scrollGesture: GestureType;
 };
 
-export const TodoCategoryColumn = ({ category, todos }: Props) => {
+export const TodoCategoryColumn = ({ category, todos, scrollGesture }: Props) => {
     const { previewCategory, previewIndex } = useDragState();
 
     const active = previewCategory === category.id;
@@ -50,7 +52,7 @@ export const TodoCategoryColumn = ({ category, todos }: Props) => {
                             )}
 
                             <View onLayout={e => handleLayout(todo.id, e)}>
-                                <TodoItem todo={todo} />
+                                <TodoItem todo={todo} scrollGesture={scrollGesture} />
                             </View>
                         </React.Fragment>
                     );

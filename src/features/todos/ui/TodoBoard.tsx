@@ -7,8 +7,11 @@ import { useTodoStore } from "@/store/todo.store";
 import { selectGroupedTodos } from "@/store/todo.selectors";
 import { DragOverlay } from "@/features/drag-drop/ui/DragOverlay";
 import { DropZone } from "@/features/todos/ui/DropZone";
+import {Gesture, GestureDetector} from "react-native-gesture-handler";
 
 export const TodoBoard = () => {
+    const scrollGesture = Gesture.Native();
+
     const todos = useTodoStore(state => state.todos);
 
     const categories = useTodoStore(state => state.categories);
@@ -18,6 +21,7 @@ export const TodoBoard = () => {
     const scrollRef = useRef<ScrollView>(null);
 
     return (
+        <GestureDetector gesture={scrollGesture}>
         <ScrollView
             ref={scrollRef}
             scrollEnabled
@@ -42,6 +46,7 @@ export const TodoBoard = () => {
                             <TodoCategoryColumn
                                 category={category}
                                 todos={category.todos}
+                                scrollGesture={scrollGesture}
                             />
                         </DropZone>
                     </React.Fragment>
@@ -50,5 +55,6 @@ export const TodoBoard = () => {
                 <DragOverlay />
             </Box>
         </ScrollView>
+        </GestureDetector>
     );
 };

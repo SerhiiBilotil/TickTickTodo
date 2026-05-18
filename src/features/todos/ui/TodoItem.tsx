@@ -10,6 +10,7 @@ import Animated, {
 import {
     Gesture,
     GestureDetector,
+    GestureType
 } from "react-native-gesture-handler";
 
 import { Box } from "@/shared/ui/Box";
@@ -18,12 +19,14 @@ import { useDragStore } from "@/store/drag.store";
 import { TODO_ITEM_HEIGHT } from "@/features/todos/constants";
 import { useTodoDrag } from "@/features/drag-drop/hooks/useTodoDrag";
 import { Todo } from "@/features/todos/model/type";
+import {scheduleOnRN} from "react-native-worklets";
 
 type Props = {
     todo: Todo;
+    scrollGesture: GestureType;
 };
 
-export const TodoItem = ({ todo }: Props) => {
+export const TodoItem = ({ todo, scrollGesture }: Props) => {
     const drag = useTodoDrag();
 
     const itemRef = useRef<View>(null);
@@ -57,17 +60,22 @@ export const TodoItem = ({ todo }: Props) => {
                 duration: 150,
             });
 
-            runOnJS(drag.start)(
+            scheduleOnRN(
+                drag.start,
                 todo.id,
                 todo.categoryId,
             );
         });
 
     const pan = Gesture.Pan()
+        .shouldCancelWhenOutside(false)
+        .simultaneousWithExternalGesture(scrollGesture)
+        .activeOffsetY([-10, 10])
         .onUpdate(e => {
             if (!isDragging.value) return;
 
-            runOnJS(drag.move)(
+            scheduleOnRN(
+                drag.move,
                 todo.id,
                 todo.categoryId,
                 e.translationX,
@@ -83,7 +91,10 @@ export const TodoItem = ({ todo }: Props) => {
                 duration: 150,
             });
 
-            runOnJS(drag.end)(false);
+            scheduleOnRN(
+                drag.end,
+                false,
+            );
         });
 
     const gesture = Gesture.Simultaneous(
