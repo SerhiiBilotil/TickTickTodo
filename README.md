@@ -1,20 +1,17 @@
-# TickTick Todo Clone
+# TickTick Todo 
 
-A modern React Native Todo application inspired by TickTick, built with Expo Router, Zustand, Reanimated, and Shopify Restyle.
+# Installation
 
-The project focuses on scalable architecture, smooth drag-and-drop interactions, and clean separation of concerns.
+```bash
+npm install
+```
 
----
 
-# Features
+# Run the project
 
-* Todo list grouped by categories
-* Drag & drop between categories
-* Create new todo items
-* Responsive layout
-* Smooth animations using Reanimated
-* Lightweight global state management
-* Feature-based scalable architecture
+```bash
+npx expo start
+```
 
 ---
 
@@ -39,83 +36,18 @@ The project focuses on scalable architecture, smooth drag-and-drop interactions,
 * react-native-reanimated
 * react-native-gesture-handler
 
-## Persistence
-
-* AsyncStorage
-
 ---
 
 # Architecture
 
-The project follows a feature-based architecture inspired by modern production-grade React Native applications.
-
-The routing layer is isolated from business logic to ensure scalability and maintainability.
-
 ```txt
 src/
-  app/                # Routing layer only
-  features/           # Business features
-  shared/             # Shared UI and utilities
-  entities/           # Domain models
-  store/              # Global state
+  app/                
+  features/          
+  shared/             
+  entities/           
+  store/             
 ```
-
-## Architectural Principles
-
-* Separation of concerns
-* Reusable UI components
-* Scalable feature modules
-* Isolated business logic
-* Predictable global state
-* Minimal rerenders during drag interactions
-
----
-
-# State Management
-
-Global application state is managed with Zustand.
-
-Zustand was selected because it provides:
-
-* minimal boilerplate
-* excellent performance
-* simple scalable architecture
-* predictable state updates
-
-Local UI state (modals, inputs) is handled with React state when appropriate.
-
----
-
-# Drag & Drop
-
-Drag and drop interactions are implemented using:
-
-* react-native-gesture-handler
-* react-native-reanimated
-
-Animations are handled on the UI thread to ensure smooth interactions and avoid unnecessary React rerenders.
-
----
-
-# Folder Structure
-
-```txt
-src/
-  app/
-  entities/
-  features/
-    todos/
-      model/
-      ui/
-      lib/
-  shared/
-    ui/
-    theme/
-    lib/
-  store/
-```
-
----
 
 # Installation
 
@@ -123,51 +55,11 @@ src/
 npm install
 ```
 
----
 
 # Run the project
 
-## iOS
-
 ```bash
-npm run ios
+npx expo start
 ```
 
-## Android
 
-```bash
-npm run android
-```
-
-## Web
-
-```bash
-npm run web
-```
-
----
-
-# Testing
-
-The project includes unit tests for core business logic such as:
-
-* adding todos
-* moving todos between categories
-* grouping todos
-
----
-
-# Future Improvements
-
-* Backend synchronization
-* Offline-first support
-* Todo editing
-* Swipe actions
-* Advanced filtering
-* Dark mode customization
-
----
-
-# Notes
-
-The goal of this project was not only to recreate a Todo application, but also to demonstrate production-level React Native architecture and maintainable frontend engineering practices.
