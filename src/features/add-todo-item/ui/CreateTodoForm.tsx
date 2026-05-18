@@ -1,23 +1,16 @@
-import React, {useEffect} from "react";
+import React from "react";
 import { Keyboard } from "react-native";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 
 import { Box } from "@/shared/ui/Box";
-import { Input } from "@/shared/ui/Input";
 import { Button } from "@/shared/ui/Button";
 
-import { useCreateTodo } from "../model/useCreateTodo";
-import { useTodoStore } from "@/store/todo.store";
-
 type Props = {
-    onClose: () => void;
     title: string;
     setTitle: (value: string) => void;
     description: string;
     setDescription: (value: string) => void;
-    categoryId: string;
-    setCategoryId: (id: string) => void;
     submit: () => void;
-    onCloseCategory: () => void;
     inputRef?: any;
 };
 
@@ -29,9 +22,6 @@ export const CreateTodoForm = ({
                                    submit,
                                    inputRef,
                                }: Props) => {
-
-
-
 
     const handleSubmit = () => {
         if (!title.trim()) return;
@@ -46,36 +36,61 @@ export const CreateTodoForm = ({
             borderRadius="l"
             gap="m"
         >
-            <Input
+            <Box
+                backgroundColor="card"
+                borderColor='white'
+                borderRadius="l"
+                borderBottomWidth="1"
+
+
+
+            >
+            <BottomSheetTextInput
                 ref={inputRef}
                 placeholder="Title"
+                placeholderTextColor="#fff"
                 value={title}
                 onChangeText={setTitle}
-
+                returnKeyType="next"
                 style={{
-                    width: "100%",
                     fontSize: 13,
                     color: "#fff",
-                    paddingVertical: 6,
+                    padding: 5,
+                    paddingHorizontal: 6,
                 }}
-                returnKeyType="next"
             />
-
-            <Input
+            </Box>
+            <Box
+                backgroundColor="card"
+                borderColor='white'
+                borderRadius="l"
+                borderBottomWidth="1"
+            >
+            <BottomSheetTextInput
                 placeholder="Description"
+                placeholderTextColor="#fff"
                 value={description}
                 onChangeText={setDescription}
-                style={{
-                    width: "100%",
-                    fontSize: 13,
-                    color: "#fff",
-                    paddingVertical: 6,
-                }}
                 returnKeyType="done"
                 onSubmitEditing={handleSubmit}
+                multiline
+                style={{
+                    fontSize: 13,
+                    color: "#fff",
+                    paddingHorizontal: 6,
+                    padding: 5,
+                }}
             />
+            </Box>
 
-            <Button title="Create" onPress={handleSubmit} />
+            <Box
+                backgroundColor="primary"
+                borderRadius="l"
+            >
+            <Button title="Create" onPress={handleSubmit}/>
+            </Box>
+
+
         </Box>
     );
 };
