@@ -20,7 +20,6 @@ export default function Dashboard() {
 
     const openCreateModal = () => {
         sheetRef.current?.present();
-        console.log('redf', sheetRef.current);
         setTimeout(() => {
             inputRef.current?.focus?.();
         }, 100);

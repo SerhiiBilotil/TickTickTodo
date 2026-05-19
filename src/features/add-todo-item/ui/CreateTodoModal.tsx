@@ -4,12 +4,9 @@ import {
     BottomSheetModal, BottomSheetScrollView,
     BottomSheetView,
 } from "@gorhom/bottom-sheet";
-
 import { Tag } from "lucide-react-native";
-
 import { CreateTodoForm } from "./CreateTodoForm";
 import { CategorySelectModal } from "./CategorySelectModal";
-import { useBottomSheetInternal } from "@gorhom/bottom-sheet";
 import { Box } from "@/shared/ui/Box";
 import { Text } from "@/shared/ui/Text";
 import { useTodoStore } from "@/store/todo.store";
@@ -25,12 +22,11 @@ type Props = {
 };
 
 export const CreateTodoModal = ({ sheetRef, inputRef,categorySheetRef, onHideTodoModal}: Props) => {
-    const [keyboardHeight, setKeyboardHeight] = useState(0);
+
     const [open, setOpen] = useState(false);
     const [anchor, setAnchor] = useState({ x: 0, y: 0 });
-
     const categories = useTodoStore((s) => s.categories);
-
+    const dropdownHeight = categories.length * 30 ;
     const {
         title,
         setTitle,
@@ -46,22 +42,21 @@ export const CreateTodoModal = ({ sheetRef, inputRef,categorySheetRef, onHideTod
     const buttonRef = useRef<any>(null);
 
     const handleOpenCategories = () => {
-            // categorySheetRef.current?.present();
+        if (open) {
+            setOpen(false);
+            return;
+        }
+
+        buttonRef.current?.measureInWindow(
+            (x, y, width, height) => {
+                setAnchor({
+                    x,
+                    y: -dropdownHeight,
+                });
+                setOpen(true);
+            }
+        );
     };
-    useEffect(() => {
-        const show = Keyboard.addListener("keyboardDidShow", (e) => {
-            setKeyboardHeight(e.endCoordinates.height);
-        });
-
-        const hide = Keyboard.addListener("keyboardDidHide", () => {
-            setKeyboardHeight(0);
-        });
-
-        return () => {
-            show.remove();
-            hide.remove();
-        };
-    }, []);
 
 
     const handleSelectCategory = (id: string) => {
@@ -78,6 +73,7 @@ export const CreateTodoModal = ({ sheetRef, inputRef,categorySheetRef, onHideTod
             opacity={0.6}
             pressBehavior="null"
             onPress={onHideTodoModal}
+
         />
     );
 
@@ -90,14 +86,16 @@ export const CreateTodoModal = ({ sheetRef, inputRef,categorySheetRef, onHideTod
                 keyboardBlurBehavior="restore"
                 backdropComponent={renderBackdrop}
                 backgroundStyle={{backgroundColor: theme.colors.card}}
+                detached={true}
             >
-                <BottomSheetView style={{ flex: 1, padding: 16 }}>
+                <BottomSheetView style={{ flex: 1, padding: 16, overflow: "visible" }}>
                     <Box
                         backgroundColor="card"
                         borderTopLeftRadius="xl"
                         borderTopRightRadius="xl"
                         padding="m"
                         gap="l"
+                        overflow="visible"
                     >
                         <Box ref={buttonRef}>
                             <Pressable onPress={handleOpenCategories}>
@@ -142,10 +140,13 @@ export const CreateTodoModal = ({ sheetRef, inputRef,categorySheetRef, onHideTod
                 </BottomSheetView>
 
                 <CategorySelectModal
-                    sheetRef={categorySheetRef}
+                    open={open}
+                    anchor={anchor}
                     categories={categories}
-                    onSelect={setCategoryId}
+                    onClose={() => setOpen(false)}
+                    onSelect={handleSelectCategory}
                 />
+
             </BottomSheetModal>
 
 
