@@ -1,8 +1,8 @@
-import { useTodoStore } from "@/store/todo.store";
 
 import { resetDragShared } from "@/features/drag-drop/model/drag.shared";
 import {Layout} from "@react-navigation/elements";
 import {Zone} from "@/features/drag-drop/model/type";
+import {Todo} from "@/features/todos/model/type";
 
 
 type LayoutsMap = Record<string, Layout>;
@@ -34,8 +34,8 @@ export const finishDrag = (
 
 export const getCategoryTodoIds = (
     categoryId: string,
+    todos: Todo[],
 ): string[] => {
-    const todos = useTodoStore.getState().todos;
 
     return todos
         .filter(todo => todo.categoryId === categoryId)

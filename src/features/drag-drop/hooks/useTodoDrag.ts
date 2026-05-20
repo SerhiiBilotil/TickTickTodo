@@ -1,22 +1,22 @@
 import { useDragStore } from "@/store/drag.store";
 import { useDragState } from "./useDragState";
 import { useTodoReorder } from "../../todos/hooks/useTodoReorder";
-import { resolveIndexByY, resolveZoneByY } from "@/features/drag-drop/lib/layoutRegistry";
+import { resolveIndexByY, resolveZoneByY } from "@/features/drag-drop/lib/drag-resolver";
 import { getZoneData, finishDrag, getCategoryTodoIds } from "@/features/drag-drop/lib/drag.utils";
 
 import {dragX, dragY, initialDragX, initialDragY} from "../model/drag.shared";
+import {useTodoStore} from "@/store/todo.store";
 
 export function useTodoDrag() {
     const { startDrag, reset, setReordering, layouts, categoryZones, setPreview } = useDragState();
 
     const { reorder, changeCategory } = useTodoReorder();
+    const todos = useTodoStore.getState().todos;
     const zones = Object.values(categoryZones);
 
 
 
     const start = (id: string, categoryId: string) => {
-        console.log('start')
-
 
         const data = getZoneData(id, categoryId, layouts, categoryZones);
 
@@ -30,7 +30,7 @@ export function useTodoDrag() {
         initialDragX.value = layout.x;
         initialDragY.value = layout.y + zone.y;
 
-        const index = getCategoryTodoIds(categoryId)
+        const index = getCategoryTodoIds(categoryId, todos)
             .findIndex(itemId => itemId === id);
 
     };
@@ -41,15 +41,12 @@ export function useTodoDrag() {
         dx: number,
         dy: number,
     ) => {
-        console.log('move')
         startDrag(id, categoryId);
         const data = getZoneData(id, categoryId, layouts, categoryZones);
 
         if (!data) return;
 
         const { layout, zone } = data;
-
-        console.log('layout', layout, zone.y);
 
         dragX.value = initialDragX.value + dx;
         dragY.value = initialDragY.value + dy;
@@ -60,7 +57,7 @@ export function useTodoDrag() {
 
         if (!targetZone) return;
 
-        const items = getCategoryTodoIds(targetZone.id);
+        const items = getCategoryTodoIds(targetZone.id, todos);
 
         const index = resolveIndexByY(centerY, items, id, layouts, targetZone);
 
@@ -69,7 +66,6 @@ export function useTodoDrag() {
 
     const end = (cancelled: boolean) => {
         setReordering(true);
-        console.log('end')
         const finish = () => finishDrag(reset, setReordering);
 
         if (cancelled) return requestAnimationFrame(finish);
